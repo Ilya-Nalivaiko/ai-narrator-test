@@ -14,6 +14,9 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.CompletableFuture;
+
+
 public class EventCalls {
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
     private static boolean itemCraftedFlag = false;
@@ -26,7 +29,7 @@ public class EventCalls {
         }
     }
 
-    // Handles crafting events
+
     private static void itemCrafted(ClientPlayerEntity player) {
         if (player.currentScreenHandler instanceof CraftingScreenHandler) {
             CraftingScreenHandler craftingScreenHandler = (CraftingScreenHandler) player.currentScreenHandler;
@@ -41,6 +44,7 @@ public class EventCalls {
                         if (!lastCraftedItem.isEmpty()){
                             player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()), false);
                             NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
+                            GTPInterface.getGPTResponse(lastCraftedItem.getName().getString(), player);
                             break;
                         }
                     }
@@ -56,6 +60,7 @@ public class EventCalls {
         player.sendMessage(Text.literal("You are using: " + stack.getName().getString()), false);
         NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
     }
+    
 
     // Handles attacking entities
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {

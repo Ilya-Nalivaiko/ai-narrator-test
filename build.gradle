@@ -39,6 +39,11 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
+	// Needed for communication with chat gpt
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'org.json:json:20210307'
+	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
 }
 
 processResources {
