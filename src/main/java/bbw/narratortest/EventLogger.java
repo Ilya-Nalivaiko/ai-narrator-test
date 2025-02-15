@@ -36,6 +36,7 @@ public class EventLogger {
 
         // Build the result string
         StringBuilder result = new StringBuilder();
+        result.append("Recently, the player performed the following actions:");
         for (Map.Entry<String, Map<String, Integer>> typeEntry : eventMap.entrySet()) {
             String type = typeEntry.getKey();
             Map<String, Integer> extraMap = typeEntry.getValue();
@@ -47,6 +48,8 @@ public class EventLogger {
                 result.append(String.format("[%s] a [%s]: x%d%n", type, extra, count));
             }
         }
+
+        events = new ArrayList<>();
 
         return result.toString();
     }
