@@ -2,10 +2,17 @@ package bbw.narratortest;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -14,20 +21,11 @@ public class EventCalls {
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
     private static boolean itemCraftedFlag = false;
 
+    // Called on client tick
     public static void onClientTick(MinecraftClient client) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player != null && player.currentScreenHandler instanceof CraftingScreenHandler) {
-            CraftingScreenHandler craftingScreenHandler = (CraftingScreenHandler) player.currentScreenHandler;
-            ItemStack outputSlotStack = craftingScreenHandler.getSlot(0).getStack();
-
-            if (!outputSlotStack.isEmpty() && !ItemStack.areEqual(outputSlotStack, lastCraftedItem) && !isAir(outputSlotStack)) {
-                lastCraftedItem = outputSlotStack.copy();
-                itemCraftedFlag = true;
-            } else if (outputSlotStack.isEmpty() && itemCraftedFlag) {
-                itemCrafted(player);
-                lastCraftedItem = ItemStack.EMPTY; // Reset the last crafted item
-                itemCraftedFlag = false;
-            }
+        if (player != null) {
+            itemCrafted(player);
         }
     }
 
@@ -65,10 +63,17 @@ public class EventCalls {
                 break;
             }
         }
+    // Handles starting to use an item
+    public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
+        player.sendMessage(Text.literal("You are using: " + stack.getName().getString()), false);
     }
     
 
-    private static boolean isAir(ItemStack stack) {
-        return stack.isEmpty();
+    // Handles attacking entities
+    public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        if (entity instanceof LivingEntity) {
+            player.sendMessage(Text.literal("You just hit: " + entity.getName().getString()), false);
+        }
+        return ActionResult.PASS;
     }
 }
