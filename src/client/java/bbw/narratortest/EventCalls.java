@@ -38,8 +38,11 @@ public class EventCalls {
             } else if (outputSlotStack.isEmpty() && itemCraftedFlag) {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
-                        player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()), false);
-                        break;
+                        if (!lastCraftedItem.isEmpty()){
+                            player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()), false);
+                            NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
+                            break;
+                        }
                     }
                 }
                 lastCraftedItem = ItemStack.EMPTY; // Reset the last crafted item
@@ -51,12 +54,14 @@ public class EventCalls {
     // Handles starting to use an item
     public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
         player.sendMessage(Text.literal("You are using: " + stack.getName().getString()), false);
+        NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
     }
 
     // Handles attacking entities
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
             player.sendMessage(Text.literal("You just hit: " + entity.getName().getString()), false);
+            NarratorTest.eventLogger.appendEvent("Hit Entity", entity.getName().getString(), System.currentTimeMillis());
         }
         return ActionResult.PASS;
     }

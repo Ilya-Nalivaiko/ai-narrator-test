@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class NarratorTest implements ModInitializer {
+	public static EventLogger eventLogger = new EventLogger();
+
     public static final String MOD_ID = "narrator-test";
 
     // Logger for console and log file
@@ -88,18 +90,21 @@ public class NarratorTest implements ModInitializer {
         Identifier biomeId = biomeKey.getValue();
         String biomeName = biomeId.getPath(); // e.g., "plains", "desert"
         player.sendMessage(Text.literal("You entered the " + biomeName + " biome!"), false);
+		eventLogger.appendEvent("Enter Biome", biomeName, System.currentTimeMillis());
     }
 
     // Handles structure enter events
     private void onStructureEnter(ServerPlayerEntity player, Identifier structureId) {
         String structureName = structureId.getPath(); // e.g., "village", "stronghold"
         player.sendMessage(Text.literal("You entered a " + structureName + "!"), false);
+		eventLogger.appendEvent("Enter Structure", structureName, System.currentTimeMillis());
     }
 
     // Handles killing entities (server-side)
     private void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
         player.sendMessage(Text.literal("You just killed: " + killedEntity.getName().getString()), false);
-    }
+		eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
+	}
 
     // Gets the structure at a specific position
     private Identifier getStructureAt(ServerWorld world, BlockPos pos) {
