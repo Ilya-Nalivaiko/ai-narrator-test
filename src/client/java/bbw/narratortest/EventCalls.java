@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
@@ -60,10 +59,5 @@ public class EventCalls {
             player.sendMessage(Text.literal("You just hit: " + entity.getName().getString()), false);
         }
         return ActionResult.PASS;
-    }
-
-    // Handles killing entities
-    public static void onEntityKill(PlayerEntity player, World world, LivingEntity killedEntity, @Nullable DamageSource source) {
-        player.sendMessage(Text.literal("You just killed: " + killedEntity.getName().getString()), false);
     }
 }
