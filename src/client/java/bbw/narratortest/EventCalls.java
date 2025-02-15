@@ -49,12 +49,9 @@ public class EventCalls {
         }
     }
 
-    // Handles finishing using an item (e.g., eating food)
-    public static void onFinishUsingItem(ItemStack stack, World world, LivingEntity user) {
-        if (user instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) user;
-            player.sendMessage(Text.literal("You just ate: " + stack.getName().getString()), false);
-        }
+    // Handles starting to use an item
+    public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
+        player.sendMessage(Text.literal("You are using: " + stack.getName().getString()), false);
     }
 
     // Handles attacking entities

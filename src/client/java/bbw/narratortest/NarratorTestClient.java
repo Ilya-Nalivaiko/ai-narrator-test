@@ -6,8 +6,6 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.util.ActionResult;
 import net.minecraft.item.ItemStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
 
 public class NarratorTestClient implements ClientModInitializer {
     @Override
@@ -17,17 +15,19 @@ public class NarratorTestClient implements ClientModInitializer {
 
         // Register attack entity event
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            ActionResult result = EventCalls.onEntityDamage(player, world, hand, entity, hitResult);
-            return result;
+            // Only process the event if it's not canceled and the player is not spectating
+            if (!world.isClient && player.isAttackable() && !player.isSpectator()) {
+                ActionResult result = EventCalls.onEntityDamage(player, world, hand, entity, hitResult);
+                return result;
+            }
+            return ActionResult.PASS;
         });
 
-        // Register finish using item event
+        // Register item usage event (triggers at the start of item usage)
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getStackInHand(hand);
-            if (!world.isClient) { //TODO:Check if the item is food
-                EventCalls.onFinishUsingItem(stack, world, player);
-            }
-            return ActionResult.PASS; // Return PASS to allow the item usage to proceed
+            EventCalls.onStartUsingItem(stack, world, player);
+            return ActionResult.PASS; // Allow the item usage to proceed
         });
     }
 }
