@@ -89,20 +89,20 @@ public class NarratorTest implements ModInitializer {
     private void onBiomeChange(ServerPlayerEntity player, RegistryKey<Biome> biomeKey) {
         Identifier biomeId = biomeKey.getValue();
         String biomeName = biomeId.getPath(); // e.g., "plains", "desert"
-        player.sendMessage(Text.literal("You entered the " + biomeName + " biome!"), false);
+        player.sendMessage(Text.literal("[DEBUG] You entered the " + biomeName + " biome!"), false);
 		eventLogger.appendEvent("Enter Biome", biomeName, System.currentTimeMillis());
     }
 
     // Handles structure enter events
     private void onStructureEnter(ServerPlayerEntity player, Identifier structureId) {
         String structureName = structureId.getPath(); // e.g., "village", "stronghold"
-        player.sendMessage(Text.literal("You entered a " + structureName + "!"), false);
+        player.sendMessage(Text.literal("[DEBUG] You entered a " + structureName + "!"), false);
 		eventLogger.appendEvent("Enter Structure", structureName, System.currentTimeMillis());
     }
 
     // Handles killing entities (server-side)
     private void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
-        player.sendMessage(Text.literal("You just killed: " + killedEntity.getName().getString()), false);
+        player.sendMessage(Text.literal("[DEBUG] You just killed: " + killedEntity.getName().getString()), false);
 		eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
 	}
 

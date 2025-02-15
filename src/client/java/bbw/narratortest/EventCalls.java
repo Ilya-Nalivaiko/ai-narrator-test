@@ -42,9 +42,8 @@ public class EventCalls {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
                         if (!lastCraftedItem.isEmpty()){
-                            player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()), false);
+                            player.sendMessage(Text.literal("[DEBUG] You just crafted: " + lastCraftedItem.getName().getString()), false);
                             NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
-                            GTPInterface.getGPTResponse(lastCraftedItem.getName().getString(), player);
                             break;
                         }
                     }
@@ -57,7 +56,7 @@ public class EventCalls {
 
     // Handles starting to use an item
     public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
-        player.sendMessage(Text.literal("You are using: " + stack.getName().getString()), false);
+        player.sendMessage(Text.literal("[DEBUG] You are using: " + stack.getName().getString()), false);
         NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
     }
     
@@ -65,7 +64,7 @@ public class EventCalls {
     // Handles attacking entities
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
-            player.sendMessage(Text.literal("You just hit: " + entity.getName().getString()), false);
+            player.sendMessage(Text.literal("[DEBUG] You just hit: " + entity.getName().getString()), false);
             NarratorTest.eventLogger.appendEvent("Hit Entity", entity.getName().getString(), System.currentTimeMillis());
         }
         return ActionResult.PASS;
