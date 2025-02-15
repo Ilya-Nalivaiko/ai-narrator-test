@@ -5,13 +5,13 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 
 public class GTPInterface {
-    public static void getGPTResponse(String craftedItemName, ClientPlayerEntity player){
+    public static void getGPTFeedback(String prompt, ClientPlayerEntity player){
         // Print to console for debugging
-        System.out.println("[DEBUG] Sending request to ChatGPT: The player crafted: " + craftedItemName);
+        System.out.println("[DEBUG] Sending request to ChatGPT: " + prompt);
 
         // Run GPT request asynchronously
         CompletableFuture.supplyAsync(() -> {
-            String narration = ChatGPTTest.getNarration("The player crafted: " + craftedItemName);
+            String narration = ChatGPTTest.getNarration(prompt);
             
             // Debugging: Print GPT response to console
             System.out.println("[DEBUG] GPT Response: " + narration);
