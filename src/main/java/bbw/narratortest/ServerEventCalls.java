@@ -59,20 +59,20 @@ public class ServerEventCalls {
         Identifier biomeId = biomeKey.getValue();
         String biomeName = biomeId.getPath(); // e.g., "plains", "desert"
         NarratorTest.sendLogSuccessMessage("You entered the " + biomeName + " biome!", player);
-		NarratorTest.eventLogger.appendEvent("Enter Biome", biomeName, System.currentTimeMillis());
+		NarratorTest.addEvent(player, "Enter Biome", biomeName, System.currentTimeMillis());
     }
 
     // Handles structure enter events
     private static void onStructureEnter(ServerPlayerEntity player, Identifier structureId) {
         String structureName = structureId.getPath(); // e.g., "village", "stronghold"
         NarratorTest.sendLogSuccessMessage("You entered a " + structureName + "!", player);
-		NarratorTest.eventLogger.appendEvent("Enter Structure", structureName, System.currentTimeMillis());
+		NarratorTest.addEvent(player, "Enter Structure", structureName, System.currentTimeMillis());
     }
 
     // Handles killing entities (server-side)
     public static void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
         NarratorTest.sendLogSuccessMessage("You just killed: " + killedEntity.getName().getString(), player);
-        NarratorTest.eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
+        NarratorTest.addEvent(player, "Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
     }
 
     // Handles block breaking events
@@ -81,7 +81,7 @@ public class ServerEventCalls {
         String toolName = heldItem.isEmpty() ? "hands" : heldItem.getName().getString();
 
         NarratorTest.sendLogSuccessMessage("You broke a block: " + blockName + " with " + toolName, player);
-        NarratorTest.eventLogger.appendEvent("Break Block", blockName + " with " + toolName, System.currentTimeMillis());
+        NarratorTest.addEvent(player, "Break Block", blockName + " with " + toolName, System.currentTimeMillis());
     }
 
     // Gets the structure at a specific position

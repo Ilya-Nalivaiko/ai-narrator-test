@@ -1,5 +1,7 @@
 package bbw.narratortest;
 
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,7 @@ import net.minecraft.text.Text;
 
 
 public class NarratorTest implements ModInitializer {
-	public static EventLogger eventLogger = new EventLogger();
+	private static HashMap<String, EventLogger> eventLoggerMap = new HashMap<>();
 
     public static final String MOD_ID = "narrator-test";
 
@@ -29,6 +31,28 @@ public class NarratorTest implements ModInitializer {
 
     // Logger for console and log file
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static void addEvent(PlayerEntity player, String type, String extra, long time){
+		EventLogger logger = eventLoggerMap.get(player.getUuidAsString());
+		if (logger == null){
+			logger = new EventLogger();
+			eventLoggerMap.put(player.getUuidAsString(), logger);
+		}
+		logger.appendEvent(type, extra, time);
+	}
+
+	public static EventLogger getLogger(PlayerEntity player){
+		EventLogger logger = eventLoggerMap.get(player.getUuidAsString());
+		if (logger == null){
+			logger = new EventLogger();
+			eventLoggerMap.put(player.getUuidAsString(), logger);
+		}
+		return logger;
+	}
+
+	public static void clearLoggers(){
+		eventLoggerMap = new HashMap<>();
+	}
 
 	@Override
 	public void onInitialize() {

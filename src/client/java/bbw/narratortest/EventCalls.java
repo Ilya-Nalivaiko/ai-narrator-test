@@ -57,12 +57,12 @@ public class EventCalls {
 
     private static void onPlayerDamaged(PlayerEntity player, DamageSource source){
         NarratorTest.sendLogSuccessMessage("You took damage from " + source.getName(), player);
-        NarratorTest.eventLogger.appendEvent("Took damage from", source.getName(), System.currentTimeMillis());
+        NarratorTest.addEvent(player, "Took damage from", source.getName(), System.currentTimeMillis());
     }
 
     private static void onPlayerDeath(PlayerEntity player) {
         NarratorTest.sendLogSuccessMessage("You died", player);
-        NarratorTest.eventLogger.appendEvent("Took damage", "and died", System.currentTimeMillis());
+        NarratorTest.addEvent(player, "Took damage", "and died", System.currentTimeMillis());
     }
 
     private static void itemCrafted(ClientPlayerEntity player) {
@@ -78,7 +78,7 @@ public class EventCalls {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
                         if (!lastCraftedItem.isEmpty()) {
                             NarratorTest.sendLogSuccessMessage("You just crafted: " + lastCraftedItem.getName().getString(), player);
-                            NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
+                            NarratorTest.addEvent(player, "Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
                             break;
                         }
 
@@ -95,7 +95,7 @@ public class EventCalls {
         // Only log non-block items to avoid duplication with block placement detection
         if (!(stack.getItem() instanceof BlockItem)) {
             NarratorTest.sendLogSuccessMessage("You are using: " + stack.getName().getString(), player);
-            NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
+            NarratorTest.addEvent(player, "Use Item", stack.getName().getString(), System.currentTimeMillis());
         }
     }
 
@@ -104,7 +104,7 @@ public class EventCalls {
             @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
             NarratorTest.sendLogSuccessMessage("You just hit: " + entity.getName().getString(), player);
-            NarratorTest.eventLogger.appendEvent("Hit Entity", entity.getName().getString(), System.currentTimeMillis());
+            NarratorTest.addEvent(player, "Hit Entity", entity.getName().getString(), System.currentTimeMillis());
         }
         return ActionResult.PASS;
     }
