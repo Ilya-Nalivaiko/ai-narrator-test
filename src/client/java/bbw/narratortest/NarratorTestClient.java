@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.AnvilBlock;
@@ -51,7 +50,6 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
@@ -93,20 +91,14 @@ public class NarratorTestClient implements ClientModInitializer {
                 // Check if the block is interactable (e.g., chest, furnace)
                 if (isInteractableBlock(interactedBlock)) {
                     // Log the block interaction
-                    player.sendMessage(
-                        Text.literal("[DEBUG] You interacted with a block: " + interactedBlock.getName().getString() + " at " + interactedPos.toShortString()),
-                        false
-                    );
+                    NarratorTest.sendDebugMessage("You interacted with a block: " + interactedBlock.getName().getString() + " at " + interactedPos.toShortString(), player);
                     NarratorTest.eventLogger.appendEvent("Interact Block", interactedBlock.getName().getString(), System.currentTimeMillis());
                 } else {
                     // Check if the player is placing a block
                     ItemStack stack = player.getStackInHand(hand);
                     if (stack.getItem() instanceof BlockItem) {
                         BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
-                        player.sendMessage(
-                            Text.literal("[DEBUG] You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString()),
-                            false
-                        );
+                        NarratorTest.sendDebugMessage("You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString(), player);
                         NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(), System.currentTimeMillis());
                     }
                 }
@@ -123,17 +115,11 @@ public class NarratorTestClient implements ClientModInitializer {
                 for (ItemStack stack : player.getArmorItems()) {
                     if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
                         armorState.set(i, stack.getName().getString());
-                        player.sendMessage(
-                            Text.literal("[DEBUG] You equipped: " + stack.getName().getString()),
-                            false
-                        );
+                        NarratorTest.sendDebugMessage("You equipped: " + stack.getName().getString(), player);
                         NarratorTest.eventLogger.appendEvent("Equip", stack.getName().getString(), System.currentTimeMillis());
                         
                     } else if (stack.isEmpty() && !armorState.get(i).isEmpty()){
-                        player.sendMessage(
-                            Text.literal("[DEBUG] You unequipped: " + armorState.get(i)),
-                            false
-                        );
+                        NarratorTest.sendDebugMessage("You unequipped: " + armorState.get(i), player);
                         NarratorTest.eventLogger.appendEvent("Unequip", armorState.get(i), System.currentTimeMillis());
                         armorState.set(i, "");
                     }
@@ -149,23 +135,14 @@ public class NarratorTestClient implements ClientModInitializer {
                 ItemStack heldItem = player.getStackInHand(hand);
 
                 if (animal.isBreedingItem(heldItem)) {
-                    player.sendMessage(
-                        Text.literal("[DEBUG] You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString()),
-                        false
-                    );
+                    NarratorTest.sendDebugMessage("You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString(), player);
                     NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
                 } else {
-                    player.sendMessage(
-                        Text.literal("[DEBUG] You tried to breed: " + entity.getName().getString() + " with an invalid item (this was not logged)"),
-                        false
-                    );
+                    NarratorTest.sendDebugMessage("You tried to breed: " + entity.getName().getString() + " with an invalid item (this was not logged)", player);
                 }
             }
             if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
-                player.sendMessage(
-                    Text.literal("[DEBUG] You traded with : " + entity.getName().getString()),
-                    false
-                );
+                NarratorTest.sendDebugMessage("You traded with : " + entity.getName().getString(), player);
                 NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
             
             }

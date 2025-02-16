@@ -7,7 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -59,20 +58,20 @@ public class ServerEventCalls {
     private static void onBiomeChange(ServerPlayerEntity player, RegistryKey<Biome> biomeKey) {
         Identifier biomeId = biomeKey.getValue();
         String biomeName = biomeId.getPath(); // e.g., "plains", "desert"
-        player.sendMessage(Text.literal("[DEBUG] You entered the " + biomeName + " biome!"), false);
+        NarratorTest.sendDebugMessage("You entered the " + biomeName + " biome!", player);
 		NarratorTest.eventLogger.appendEvent("Enter Biome", biomeName, System.currentTimeMillis());
     }
 
     // Handles structure enter events
     private static void onStructureEnter(ServerPlayerEntity player, Identifier structureId) {
         String structureName = structureId.getPath(); // e.g., "village", "stronghold"
-        player.sendMessage(Text.literal("[DEBUG] You entered a " + structureName + "!"), false);
+        NarratorTest.sendDebugMessage("You entered a " + structureName + "!", player);
 		NarratorTest.eventLogger.appendEvent("Enter Structure", structureName, System.currentTimeMillis());
     }
 
     // Handles killing entities (server-side)
     public static void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
-        player.sendMessage(Text.literal("[DEBUG] You just killed: " + killedEntity.getName().getString()), false);
+        NarratorTest.sendDebugMessage("You just killed: " + killedEntity.getName().getString(), player);
         NarratorTest.eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
     }
 
@@ -81,7 +80,7 @@ public class ServerEventCalls {
         ItemStack heldItem = player.getMainHandStack();
         String toolName = heldItem.isEmpty() ? "hands" : heldItem.getName().getString();
 
-        player.sendMessage(Text.literal("[DEBUG] You broke a block: " + blockName + " with " + toolName), false);
+        NarratorTest.sendDebugMessage("You broke a block: " + blockName + " with " + toolName, player);
         NarratorTest.eventLogger.appendEvent("Break Block", blockName + " with " + toolName, System.currentTimeMillis());
     }
 

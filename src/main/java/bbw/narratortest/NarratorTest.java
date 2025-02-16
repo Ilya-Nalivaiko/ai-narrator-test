@@ -9,13 +9,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-
-import java.security.Timestamp;
+import net.minecraft.text.Text;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import bbw.narratortest.config.ModConfig;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 
@@ -57,5 +56,11 @@ public class NarratorTest implements ModInitializer {
             ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, state.getBlock().getName().getString());
         });
 
+    }
+
+    public static void sendDebugMessage(String message, PlayerEntity player){
+        if (ModConfig.getConfig().debugLevel == 2){
+            player.sendMessage(Text.literal("[DEBUG] " + message), false);
+        }
     }
 }
