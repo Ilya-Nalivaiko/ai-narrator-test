@@ -9,7 +9,7 @@ public class Event {
     public Event(String type, String extra, long timestamp) {
         this.type = type;
         this.extra = extra;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp - NarratorTest.startTime;
     }
 
     public String getType() {

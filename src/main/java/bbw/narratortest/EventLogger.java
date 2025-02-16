@@ -58,9 +58,9 @@ public class EventLogger {
 
         // Build the result string
         StringBuilder result = new StringBuilder();
-        result.append("Recently, the player performed the following actions:");
+        result.append("Recently, the player performed the following actions (the times are since logging in):");
         for (Event entry: events) {
-            result.append(String.format("[%s] a [%s] at %d%n", entry.getType(), entry.getExtra(), entry.getTimestamp()));
+            result.append(String.format("[%s] a [%s] at %s%n", entry.getType(), entry.getExtra(), TimeFormatter.formatMilisString(entry.getTimestamp()) ));
         }
 
         events = new ArrayList<>();

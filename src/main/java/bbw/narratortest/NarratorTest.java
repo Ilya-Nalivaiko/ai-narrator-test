@@ -9,6 +9,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+
+import java.security.Timestamp;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +24,8 @@ public class NarratorTest implements ModInitializer {
 
     public static final String MOD_ID = "narrator-test";
 
+    public static long startTime = 0;
+
     // Logger for console and log file
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
@@ -28,6 +33,8 @@ public class NarratorTest implements ModInitializer {
     public void onInitialize() {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         LOGGER.info("Hello Fabric world!");
+
+        startTime = System.currentTimeMillis();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             NarratorConfigCommand.register(dispatcher);
