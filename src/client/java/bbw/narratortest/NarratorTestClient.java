@@ -54,10 +54,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
+import java.util.ArrayList;
 
 public class NarratorTestClient implements ClientModInitializer {
+    private static ArrayList<String> armorState = new ArrayList<String>();
+
     @Override
     public void onInitializeClient() {
+        for (int i=0; i<4; i++){
+            armorState.add("");
+        }
+
         // Register client commands
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             DebugCommand.register(dispatcher);
@@ -106,6 +113,35 @@ public class NarratorTestClient implements ClientModInitializer {
             }
             return ActionResult.PASS; // Allow the interaction to proceed
         });
+
+
+        // Equip armor event
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            PlayerEntity player = MinecraftClient.getInstance().player;
+            if (player != null) {
+                int i = 0;
+                for (ItemStack stack : player.getArmorItems()) {
+                    if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
+                        armorState.set(i, stack.getName().getString());
+                        player.sendMessage(
+                            Text.literal("[DEBUG] You equipped: " + stack.getName().getString()),
+                            false
+                        );
+                        NarratorTest.eventLogger.appendEvent("Equip", stack.getName().getString(), System.currentTimeMillis());
+                        
+                    } else if (stack.isEmpty() && !armorState.get(i).isEmpty()){
+                        player.sendMessage(
+                            Text.literal("[DEBUG] You unequipped: " + armorState.get(i)),
+                            false
+                        );
+                        NarratorTest.eventLogger.appendEvent("Unequip", armorState.get(i), System.currentTimeMillis());
+                        armorState.set(i, "");
+                    }
+                    i++;
+                }
+            }
+        });
+
         // Breeding and taming animals event
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (entity instanceof AnimalEntity) {
