@@ -10,6 +10,8 @@ import okhttp3.*;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
@@ -98,15 +100,14 @@ public class ChatGPTTest {
                         audioPlayer.targetType,
                         withHeader);
                 byte[] finalBytes = withHeader.toByteArray();
-					// Send to nearby players
-					world.getPlayers().stream()
-							.filter(p -> p.getBlockPos().isWithinDistance(player.getBlockPos(), 20))
-							.forEach(nearbyPlayer -> {
-								System.out.println("Sending audio to player: " +
-										nearbyPlayer.getName().getString());
-								ServerPlayNetworking.send((ServerPlayerEntity) nearbyPlayer,
-										new TtsPayload(player.getBlockPos(), finalBytes));
-							});
+                AudioInputStream audioInputStream = new AudioInputStream(
+                    new ByteArrayInputStream(finalBytes),
+                    audioPlayer.getAudioFormat(),
+                    audioBytes.length);
+
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start(); // ✅ Play the audio
                 // TODO: Insert logic to send `finalBytes` to players if necessary
                 // (e.g., using ServerPlayNetworking)
                 
