@@ -1,10 +1,13 @@
 package bbw.narratortest;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.MinecraftClient;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.AnvilBlock;
@@ -44,6 +47,8 @@ import net.minecraft.block.StonecutterBlock;
 import net.minecraft.block.StructureBlock;
 import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -100,6 +105,18 @@ public class NarratorTestClient implements ClientModInitializer {
                 }
             }
             return ActionResult.PASS; // Allow the interaction to proceed
+        });
+        // Breeding and taming animals event
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (entity instanceof AnimalEntity) {
+                player.sendMessage(
+                    Text.literal("[DEBUG] You bred: " + entity.getName().getString()),
+                    false
+                );
+                NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString(), System.currentTimeMillis());
+            
+            }
+            return ActionResult.PASS;
         });
     }
 
