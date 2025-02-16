@@ -14,7 +14,9 @@ public class ModConfig {
     public static class ConfigData {
         public double temperature = 0.3;
         public String systemPrompt = "You are a backseat gaming Minecraft player. You are very opinionated and mean. Keep it max 2 sentences, unless the player really makes a mistake like making a diamond hoe.";
-        public int debugLevel = 2;
+        public int debugLevel = 1;
+        public int narratorCooldown = 20;
+        public int maxEvents = 40;
     }
 
     private static ConfigData config = new ConfigData();

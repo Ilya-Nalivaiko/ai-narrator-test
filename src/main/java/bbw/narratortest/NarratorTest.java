@@ -151,8 +151,8 @@ public class NarratorTest implements ModInitializer {
         if (ModConfig.getConfig().debugLevel == 2){
             player.sendMessage(Text.literal("[LOGGED] " + message), false);
         }
-        if (ModConfig.getConfig().debugLevel >= 1){
-            LOGGER.debug(message);
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
         }
     }
 
@@ -160,8 +160,17 @@ public class NarratorTest implements ModInitializer {
         if (ModConfig.getConfig().debugLevel == 2){
             player.sendMessage(Text.literal("[NOT LOGGED] " + message), false);
         }
-        if (ModConfig.getConfig().debugLevel >= 1){
-            LOGGER.debug(message);
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
+        }
+    }
+
+	public static void sendRequestInfoMessage(String message, PlayerEntity player){
+        if (ModConfig.getConfig().debugLevel == 2){
+            player.sendMessage(Text.literal("[REQUEST] " + message), false);
+        }
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
         }
     }
 
