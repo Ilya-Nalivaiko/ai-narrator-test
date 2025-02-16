@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import bbw.narratortest.config.ModConfig;
@@ -40,7 +41,7 @@ public class TTSGenerator {
         "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
   }
 
-  public static void speak(String text, ServerPlayerEntity player, World world) {
+  public static void speak(String text, PlayerEntity player, World world) {
     // ✅ Text-to-Speech Processing
     VoiceManager voiceManager = VoiceManager.getInstance();
     Voice voice = voiceManager.getVoice("kevin16");

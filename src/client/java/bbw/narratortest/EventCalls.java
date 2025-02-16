@@ -62,7 +62,7 @@ public class EventCalls {
 
     private static void onPlayerDeath(PlayerEntity player) {
         NarratorTest.sendLogSuccessMessage("You died", player);
-        NarratorTest.addEvent(player, "Took damage", "and died", System.currentTimeMillis());
+        NarratorTest.addEvent(player, "Died", "death", System.currentTimeMillis());
     }
 
     private static void itemCrafted(ClientPlayerEntity player) {
