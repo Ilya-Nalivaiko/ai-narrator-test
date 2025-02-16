@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import bbw.narratortest.config.ModConfig;
+import bbw.narratortest.event.AdvancementDetectionHandler;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 
@@ -34,6 +36,8 @@ public class NarratorTest implements ModInitializer {
         LOGGER.info("Hello Fabric world!");
 
         startTime = System.currentTimeMillis();
+
+        ServerMessageEvents.GAME_MESSAGE.register(new AdvancementDetectionHandler());
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             NarratorConfigCommand.register(dispatcher);
