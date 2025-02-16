@@ -4,11 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import bbw.narratortest.config.ModConfig;
+import bbw.narratortest.event.AdvancementDetectionHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import bbw.narratortest.event.AdvancementDetectionHandler;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,6 +35,7 @@ public class NarratorTest implements ModInitializer {
 	@Override
 	public void onInitialize() {
 
+        ServerMessageEvents.GAME_MESSAGE.register(new AdvancementDetectionHandler());
 
 
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -39,6 +45,10 @@ public class NarratorTest implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             NarratorConfigCommand.register(dispatcher);
+        });
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            DebugCommand.register(dispatcher);
         });
         
         // Register entity death event

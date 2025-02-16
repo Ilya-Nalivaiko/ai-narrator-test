@@ -1,11 +1,11 @@
 package bbw.narratortest;
 
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class GTPInterface {
-    public static void getGPTFeedback(String prompt, ClientPlayerEntity player){
+    public static void getGPTFeedback(String prompt, ServerPlayerEntity player){
         // Print to console for debugging
         System.out.println("[DEBUG] Sending request to ChatGPT: " + prompt);
         

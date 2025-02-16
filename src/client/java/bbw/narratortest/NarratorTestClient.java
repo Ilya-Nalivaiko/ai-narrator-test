@@ -13,7 +13,6 @@ import org.lwjgl.openal.AL10;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -79,6 +78,10 @@ import net.minecraft.client.network.ClientPlayerEntity;
 public class NarratorTestClient implements ClientModInitializer {
     private static ArrayList<String> armorState = new ArrayList<String>();
 
+    public static void clear(){
+        armorState = new ArrayList<String>();
+    }
+
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
@@ -124,11 +127,6 @@ public class NarratorTestClient implements ClientModInitializer {
         for (int i=0; i<4; i++){
             armorState.add("");
         }
-
-        // Register client commands
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            DebugCommand.register(dispatcher);
-        });
 
         // Register client tick event
         ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
