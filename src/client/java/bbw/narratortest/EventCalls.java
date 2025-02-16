@@ -2,18 +2,23 @@ package bbw.narratortest;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
 
 public class EventCalls {
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
@@ -39,7 +44,8 @@ public class EventCalls {
             } else if (outputSlotStack.isEmpty() && itemCraftedFlag) {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
-                        player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()), false);
+                        player.sendMessage(Text.literal("You just crafted: " + lastCraftedItem.getName().getString()),
+                                false);
                         break;
                     }
                 }
@@ -58,7 +64,8 @@ public class EventCalls {
     }
 
     // Handles attacking entities
-    public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+    public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity,
+            @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
             player.sendMessage(Text.literal("You just hit: " + entity.getName().getString()), false);
         }
@@ -66,7 +73,8 @@ public class EventCalls {
     }
 
     // Handles killing entities
-    public static void onEntityKill(PlayerEntity player, World world, LivingEntity killedEntity, @Nullable DamageSource source) {
+    public static void onEntityKill(PlayerEntity player, World world, LivingEntity killedEntity,
+            @Nullable DamageSource source) {
         player.sendMessage(Text.literal("You just killed: " + killedEntity.getName().getString()), false);
     }
 }
