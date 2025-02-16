@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import okhttp3.*;
 
 import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -100,14 +101,15 @@ public class ChatGPTTest {
                         audioPlayer.targetType,
                         withHeader);
                 byte[] finalBytes = withHeader.toByteArray();
-                AudioInputStream audioInputStream = new AudioInputStream(
-                    new ByteArrayInputStream(finalBytes),
-                    audioPlayer.getAudioFormat(),
-                    audioBytes.length);
+                          // Wrap the byte buffer in a stream and create an AudioInputStream
+                ByteArrayInputStream bais = new ByteArrayInputStream(finalBytes);
+                AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
+                AudioInputStream ais = new AudioInputStream(bais, format, finalBytes.length);
 
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start(); // ✅ Play the audio
+                // Obtain a Clip, open it, and play
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.start();
                 // TODO: Insert logic to send `finalBytes` to players if necessary
                 // (e.g., using ServerPlayNetworking)
                 
