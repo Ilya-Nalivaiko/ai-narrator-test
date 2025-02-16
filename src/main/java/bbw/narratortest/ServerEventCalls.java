@@ -3,6 +3,7 @@ package bbw.narratortest;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
@@ -77,8 +78,11 @@ public class ServerEventCalls {
 
     // Handles block breaking events
     public static void onBlockBreak(ServerPlayerEntity player, BlockPos pos, String blockName) {
-        player.sendMessage(Text.literal("[DEBUG] You broke a block: " + blockName), false);
-        NarratorTest.eventLogger.appendEvent("Break Block", blockName, System.currentTimeMillis());
+        ItemStack heldItem = player.getMainHandStack();
+        String toolName = heldItem.isEmpty() ? "hands" : heldItem.getName().getString();
+
+        player.sendMessage(Text.literal("[DEBUG] You broke a block: " + blockName + " with " + toolName), false);
+        NarratorTest.eventLogger.appendEvent("Break Block", blockName + " with " + toolName, System.currentTimeMillis());
     }
 
     // Gets the structure at a specific position
