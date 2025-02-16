@@ -67,11 +67,6 @@ public class NarratorTestClient implements ClientModInitializer {
             armorState.add("");
         }
 
-        // Register client commands
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            DebugCommand.register(dispatcher);
-        });
-
         // Register client tick event
         ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
 
