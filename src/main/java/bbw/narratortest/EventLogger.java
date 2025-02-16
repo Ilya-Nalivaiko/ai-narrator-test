@@ -53,4 +53,8 @@ public class EventLogger {
 
         return result.toString();
     }
+
+    public void clear(){
+        events = new ArrayList<>();
+    }
 }
