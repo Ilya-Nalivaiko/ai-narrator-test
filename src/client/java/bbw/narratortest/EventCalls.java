@@ -5,6 +5,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class EventCalls {
     private static boolean wasAlive = true; // Track the player's previous alive state
+    private static int previousHurtTime = 0;
 
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
     private static boolean itemCraftedFlag = false;
@@ -24,13 +26,11 @@ public class EventCalls {
     // Called on client tick
     public static void onClientTick(MinecraftClient client) {
         ClientPlayerEntity player = client.player;
-        if (player != null) {
-            itemCrafted(player);
-        }
-
         if (client.player == null) {
             return; // No player, do nothing
         }
+
+        itemCrafted(player);
 
         // Check if the player was alive and is now dead
         if (wasAlive && player.isDead()) {
@@ -39,6 +39,17 @@ public class EventCalls {
 
         // Update the player's alive state
         wasAlive = !player.isDead();
+
+        // Check if the player's hurt time has changed
+        if (player.hurtTime > 0 && previousHurtTime == 0) {
+            onPlayerDamaged(player, player.getRecentDamageSource());
+        }
+        previousHurtTime = player.hurtTime; // Update the previous hurt time
+    }
+
+    private static void onPlayerDamaged(PlayerEntity player, DamageSource source){
+        player.sendMessage(Text.literal("[DEBUG] You took damage from " + source.getName()), false);
+        NarratorTest.eventLogger.appendEvent("Took damage from", source.getName(), System.currentTimeMillis());
     }
 
     private static void onPlayerDeath(PlayerEntity player) {
