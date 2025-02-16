@@ -4,13 +4,17 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 public class NarratorTestClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        // Register client commands
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             DebugCommand.register(dispatcher);
         });
@@ -28,11 +32,22 @@ public class NarratorTestClient implements ClientModInitializer {
             return ActionResult.PASS;
         });
 
-        // Register item usage event (triggers at the start of item usage)
-        UseItemCallback.EVENT.register((player, world, hand) -> {
-            ItemStack stack = player.getStackInHand(hand);
-            EventCalls.onStartUsingItem(stack, world, player);
-            return ActionResult.PASS; // Allow the item usage to proceed
+        // Register block interaction event (client-side)
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+            if (world.isClient && player != null) {
+                // Log the block interaction
+                player.sendMessage(Text.literal("[DEBUG] You interacted with a block at " + hitResult.getBlockPos().toShortString()), false);
+                NarratorTest.eventLogger.appendEvent("Interact Block", hitResult.getBlockPos().toShortString(), System.currentTimeMillis());
+
+                // Check if the player is placing a block
+                ItemStack stack = player.getStackInHand(hand);
+                if (stack.getItem() instanceof BlockItem) {
+                    BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
+                    player.sendMessage(Text.literal("[DEBUG] You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString()), false);
+                    NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(), System.currentTimeMillis());
+                }
+            }
+            return ActionResult.PASS; // Allow the interaction to proceed
         });
     }
 }

@@ -5,6 +5,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.text.Text;
@@ -13,9 +14,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.CompletableFuture;
-
 
 public class EventCalls {
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
@@ -29,7 +27,6 @@ public class EventCalls {
         }
     }
 
-
     private static void itemCrafted(ClientPlayerEntity player) {
         if (player.currentScreenHandler instanceof CraftingScreenHandler) {
             CraftingScreenHandler craftingScreenHandler = (CraftingScreenHandler) player.currentScreenHandler;
@@ -41,7 +38,7 @@ public class EventCalls {
             } else if (outputSlotStack.isEmpty() && itemCraftedFlag) {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
-                        if (!lastCraftedItem.isEmpty()){
+                        if (!lastCraftedItem.isEmpty()) {
                             player.sendMessage(Text.literal("[DEBUG] You just crafted: " + lastCraftedItem.getName().getString()), false);
                             NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
                             break;
@@ -56,10 +53,12 @@ public class EventCalls {
 
     // Handles starting to use an item
     public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
-        player.sendMessage(Text.literal("[DEBUG] You are using: " + stack.getName().getString()), false);
-        NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
+        // Only log non-block items to avoid duplication with block placement detection
+        if (!(stack.getItem() instanceof BlockItem)) {
+            player.sendMessage(Text.literal("[DEBUG] You are using: " + stack.getName().getString()), false);
+            NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
+        }
     }
-    
 
     // Handles attacking entities
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
