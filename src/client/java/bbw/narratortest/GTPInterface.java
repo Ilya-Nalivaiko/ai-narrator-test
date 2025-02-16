@@ -8,7 +8,7 @@ public class GTPInterface {
     public static void getGPTFeedback(String prompt, ClientPlayerEntity player){
         // Print to console for debugging
         System.out.println("[DEBUG] Sending request to ChatGPT: " + prompt);
-
+        
         // Run GPT request asynchronously
         CompletableFuture.supplyAsync(() -> {
             String narration = ChatGPTTest.getNarration(prompt);
