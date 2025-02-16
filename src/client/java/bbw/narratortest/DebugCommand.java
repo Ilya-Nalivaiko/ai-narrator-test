@@ -12,8 +12,12 @@ public class DebugCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
-            ClientCommandManager.literal("feedback")
-                .executes(DebugCommand::executeFeedback)
+            ClientCommandManager.literal("feedback_collapsed")
+                .executes(DebugCommand::executeFeedbackCollapsed)
+        );
+        dispatcher.register(
+            ClientCommandManager.literal("feedback_full")
+                .executes(DebugCommand::executeFeedbackFull)
         );
         dispatcher.register(
             ClientCommandManager.literal("clearlog")
@@ -21,12 +25,28 @@ public class DebugCommand {
         );
     }
 
-    private static int executeFeedback(CommandContext<FabricClientCommandSource> context) {
+    private static int executeFeedbackCollapsed(CommandContext<FabricClientCommandSource> context) {
         ClientPlayerEntity player = context.getSource().getPlayer();
 
         if (player != null) {
             // Do something with the player
             GTPInterface.getGPTFeedback(NarratorTest.eventLogger.collapseEvents(), player);
+        } else {
+            // Handle the case where the command was not executed by a player (e.g., from console)
+            context.getSource().sendError(Text.of("This command can only be executed by a player."));
+        }
+        
+        // Send feedback to the player
+        context.getSource().sendFeedback(Text.of("Feedback command executed!"));
+        return 1;
+    }
+
+    private static int executeFeedbackFull(CommandContext<FabricClientCommandSource> context) {
+        ClientPlayerEntity player = context.getSource().getPlayer();
+
+        if (player != null) {
+            // Do something with the player
+            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.dontCollapseEvents(), player);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));

@@ -54,6 +54,20 @@ public class EventLogger {
         return result.toString();
     }
 
+    public String dontCollapseEvents() {
+
+        // Build the result string
+        StringBuilder result = new StringBuilder();
+        result.append("Recently, the player performed the following actions:");
+        for (Event entry: events) {
+            result.append(String.format("[%s] a [%s] at %d%n", entry.getType(), entry.getExtra(), entry.getTimestamp()));
+        }
+
+        events = new ArrayList<>();
+
+        return result.toString();
+    }
+
     public void clear(){
         events = new ArrayList<>();
     }
