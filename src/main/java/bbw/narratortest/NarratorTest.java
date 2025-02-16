@@ -1,23 +1,25 @@
 package bbw.narratortest;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import bbw.narratortest.config.ModConfig;
 import bbw.narratortest.event.AdvancementDetectionHandler;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import bbw.narratortest.event.AdvancementDetectionHandler;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 
 
 public class NarratorTest implements ModInitializer {
@@ -30,11 +32,16 @@ public class NarratorTest implements ModInitializer {
     // Logger for console and log file
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    @Override
-    public void onInitialize() {
-        // This code runs as soon as Minecraft is in a mod-load-ready state.
-        
+	@Override
+	public void onInitialize() {
+
         ServerMessageEvents.GAME_MESSAGE.register(new AdvancementDetectionHandler());
+
+
+		// This code runs as soon as Minecraft is in a mod-load-ready state.
+        LOGGER.info("Hello Fabric world!");
+
+        startTime = System.currentTimeMillis();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             NarratorConfigCommand.register(dispatcher);
@@ -61,7 +68,57 @@ public class NarratorTest implements ModInitializer {
             ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, state.getBlock().getName().getString());
         });
 
-    }
+		// This code runs as soon as Minecraft is in a mod-load-ready state.
+		// However, some things (like resources) may still be uninitialized.
+		// Proceed with mild caution.
+		System.setProperty("freetts.voices",
+				"com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+
+
+		// UseItemCallback.EVENT.register((player, world, hand) -> {
+		// 	if (!world.isClient && player instanceof ServerPlayerEntity serverPlayer) {
+		// 		VoiceManager voiceManager = VoiceManager.getInstance();
+		// 		Voice voice = voiceManager.getVoice("kevin16");
+		// 		voice.allocate();
+		// 		ByteArrayAudioPlayer audioPlayer = new ByteArrayAudioPlayer(AudioFileFormat.Type.WAVE);
+		// 		voice.setAudioPlayer(audioPlayer);
+		// 		voice.speak("This is a test of the text to speech capabilities");
+		// 		voice.deallocate();
+
+		// 		System.out.println("DONE GENERATING AUDIO");
+
+		// 		byte[] audioBytes = audioPlayer.getAudioBytes();
+		// 		System.out.println("AUDIO BYTES: " + audioBytes.length);
+		// 		System.out.println("Format:" + audioPlayer.getAudioFormat());
+
+		// 		try {
+		// 			ByteArrayOutputStream withHeader = new ByteArrayOutputStream();
+		// 			AudioSystem.write(
+		// 					new AudioInputStream(
+		// 							new ByteArrayInputStream(audioBytes),
+		// 							audioPlayer.getAudioFormat(),
+		// 							audioBytes.length),
+		// 					audioPlayer.targetType,
+		// 					withHeader);
+		// 			byte[] finalBytes = withHeader.toByteArray();
+					// // Send to nearby players
+					// world.getPlayers().stream()
+					// 		.filter(p -> p.getBlockPos().isWithinDistance(player.getBlockPos(), 20))
+					// 		.forEach(nearbyPlayer -> {
+					// 			System.out.println("Sending audio to player: " +
+					// 					nearbyPlayer.getName().getString());
+					// 			ServerPlayNetworking.send((ServerPlayerEntity) nearbyPlayer,
+					// 					new TtsPayload(player.getBlockPos(), finalBytes));
+					// 		});
+
+		// 		} catch (Exception e) {
+		// 			e.printStackTrace();
+		// 		}
+
+		// 	}
+		// 	return ActionResult.PASS;
+		// });
+	}
 
     public static void sendLogSuccessMessage(String message, PlayerEntity player){
         if (ModConfig.getConfig().debugLevel == 2){
@@ -80,4 +137,7 @@ public class NarratorTest implements ModInitializer {
             LOGGER.debug(message);
         }
     }
+
 }
+
+ 
