@@ -1,102 +1,101 @@
 package bbw.narratortest;
 
-
 import com.sun.speech.freetts.audio.AudioPlayer;
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class ByteArrayAudioPlayer implements AudioPlayer {
-    private final ByteArrayOutputStream outputStream;
-    private AudioFormat audioFormat;
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    public final AudioFileFormat.Type targetType;
+    private AudioFormat format;
+    private long startTime = -1;
+    private float volume = 1.0f;
 
-    public ByteArrayAudioPlayer(ByteArrayOutputStream outputStream) {
-        this.outputStream = outputStream;
+    public ByteArrayAudioPlayer(AudioFileFormat.Type targetType) {
+        this.targetType = targetType;
     }
 
+    // Core write methods (keep existing)
     @Override
-    public void setAudioFormat(AudioFormat format) {
-        this.audioFormat = format;
-    }
-
-    @Override
-    public AudioFormat getAudioFormat() {
-        return audioFormat;
-    }
-
-    @Override
-    public boolean write(byte[] audioData, int offset, int size) {
-        outputStream.write(audioData, offset, size);
+    public boolean write(byte[] audioData) {
+        outputStream.write(audioData, 0, audioData.length);
         return true;
     }
 
     @Override
-    public void close() {
-        try {
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void cancel() {
-    }
-
-    @Override
-    public void reset() {
-    }
-
-    @Override
-    public void begin(int size) {
-    }
-
-    @Override
-    public boolean drain() {
+    public boolean write(byte[] audioData, int offset, int length) {
+        outputStream.write(audioData, offset, length);
         return true;
     }
 
-    @Override
-    public void showMetrics() {
+    public byte[] getAudioBytes() {
+        return outputStream.toByteArray();
     }
 
+    // Minimal timing implementation
     @Override
-    public boolean end() {
-        return true;
-    }
-
-    @Override
-    public long getTime() {
-        return 0;
-    }
-
-    @Override
-    public float getVolume() {
-        return 100;
-    }
-
-    @Override
-    public void pause() {
+    public void startFirstSampleTimer() {
+        startTime = System.currentTimeMillis();
     }
 
     @Override
     public void resetTime() {
+        startTime = -1;
     }
 
     @Override
-    public void resume() {
+    public long getTime() {
+        return startTime > 0 ? System.currentTimeMillis() - startTime : 0;
+    }
+
+    // Required format methods
+    @Override
+    public AudioFormat getAudioFormat() {
+        return format;
     }
 
     @Override
-    public void setVolume(float arg0) {
+    public void setAudioFormat(AudioFormat format) {
+        this.format = format;
+    }
+
+    // Volume stubs (required but unused for byte capture)
+    @Override
+    public void setVolume(float volume) {
+        this.volume = volume;
     }
 
     @Override
-    public void startFirstSampleTimer() {
+    public float getVolume() {
+        return volume;
+    }
+
+    // Other required methods with minimal implementations
+    @Override
+    public void cancel() {
+        outputStream.reset();
     }
 
     @Override
-    public boolean write(byte[] arg0) {
-        return true;
+    public void close() {
+        // No resources to release
     }
+
+    @Override
+    public boolean drain() {
+        return true; // Already writing immediately
+    }
+
+    @Override
+    public boolean end() {
+        return true; // No special cleanup needed
+    }
+
+    // Unused methods can remain empty
+    @Override public void begin(int samples) {}
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void reset() {}
+    @Override public void showMetrics() {}
 }

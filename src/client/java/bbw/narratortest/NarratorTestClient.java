@@ -39,24 +39,23 @@ public class NarratorTestClient implements ClientModInitializer {
         (payload, context) -> {
 
           {
-
             // Read the position (if needed)
             BlockPos pos = payload.pos();
             // Read the remaining bytes (which contain your audio data)
             byte[] audioBytes = payload.audioData();
             context.client().execute(() -> {
               try {
-    
+                // Wrap the byte buffer in a stream and create an AudioInputStream
+                ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes);
+                AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
+                AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length);
+
+                // Obtain a Clip, open it, and play
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.start();
 
 
-                // ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes);
-                // // If you know the audio format (sample rate, bit depth, channels), create an
-                // // AudioFormat instance.
-                // AudioFormat format = new AudioFormat(16000, 16, 1, true, true);
-                // AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length);
-                // Clip clip = AudioSystem.getClip();
-                // clip.open(ais);
-                // clip.start();
               } catch (Exception e) {
                 e.printStackTrace();
               }

@@ -53,47 +53,41 @@ public class NarratorTest implements ModInitializer {
 				VoiceManager voiceManager = VoiceManager.getInstance();
 				Voice voice = voiceManager.getVoice("kevin16");
 				voice.allocate();
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				ByteArrayAudioPlayer audioPlayer = new ByteArrayAudioPlayer(byteArrayOutputStream);
+				ByteArrayAudioPlayer audioPlayer = new ByteArrayAudioPlayer(AudioFileFormat.Type.WAVE);
 				voice.setAudioPlayer(audioPlayer);
 				voice.speak("This is a test of the text to speech capabilities");
 				voice.deallocate();
 
 				System.out.println("DONE GENERATING AUDIO");
 
-				byte[] audioBytes = byteArrayOutputStream.toByteArray();
-
+				byte[] audioBytes = audioPlayer.getAudioBytes();
 				System.out.println("AUDIO BYTES: " + audioBytes.length);
 				System.out.println("Format:" + audioPlayer.getAudioFormat());
 
 				try {
-				
+					ByteArrayOutputStream withHeader = new ByteArrayOutputStream();
+					AudioSystem.write(
+							new AudioInputStream(
+									new ByteArrayInputStream(audioBytes),
+									audioPlayer.getAudioFormat(),
+									audioBytes.length),
+							audioPlayer.targetType,
+							withHeader);
+					byte[] finalBytes = withHeader.toByteArray();
+					// Send to nearby players
+					world.getPlayers().stream()
+							.filter(p -> p.getBlockPos().isWithinDistance(player.getBlockPos(), 20))
+							.forEach(nearbyPlayer -> {
+								System.out.println("Sending audio to player: " +
+										nearbyPlayer.getName().getString());
+								ServerPlayNetworking.send((ServerPlayerEntity) nearbyPlayer,
+										new TtsPayload(player.getBlockPos(), finalBytes));
+							});
 
-					// Wrap the byte buffer in a stream and create an AudioInputStream
-					ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes);
-					AudioFormat format = new AudioFormat(16000, 16, 1, true, true);
-					AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length);
-
-					// Obtain a Clip, open it, and play
-					Clip clip = AudioSystem.getClip();
-					clip.open(ais);
-					clip.start();
-
-					// Optionally, wait for the clip to finish playing
-					Thread.sleep((long) ((audioBytes.length / 16000) * 1000));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
-				// // Send to nearby players
-				// world.getPlayers().stream()
-				// .filter(p -> p.getBlockPos().isWithinDistance(player.getBlockPos(), 20))
-				// .forEach(nearbyPlayer -> {
-				// System.out.println("Sending audio to player: " +
-				// nearbyPlayer.getName().getString());
-				// ServerPlayNetworking.send((ServerPlayerEntity) nearbyPlayer,
-				// new TtsPayload(player.getBlockPos(), audioBytes));
-				// });
 			}
 			return ActionResult.PASS;
 		});
