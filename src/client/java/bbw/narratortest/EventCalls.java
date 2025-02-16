@@ -2,19 +2,24 @@ package bbw.narratortest;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
 
 public class EventCalls {
     private static boolean wasAlive = true; // Track the player's previous alive state
@@ -73,6 +78,7 @@ public class EventCalls {
                             NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
                             break;
                         }
+
                     }
                 }
                 lastCraftedItem = ItemStack.EMPTY; // Reset the last crafted item
@@ -91,7 +97,8 @@ public class EventCalls {
     }
 
     // Handles attacking entities
-    public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+    public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity,
+            @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
             player.sendMessage(Text.literal("[DEBUG] You just hit: " + entity.getName().getString()), false);
             NarratorTest.eventLogger.appendEvent("Hit Entity", entity.getName().getString(), System.currentTimeMillis());

@@ -16,6 +16,8 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	mavenCentral()
+
 }
 
 loom {
@@ -38,6 +40,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    
+	// FreeTTS dependency
+	implementation 'net.sf.sociaal:freetts:1.2.2'
+
 	
 	// Needed for communication with chat gpt
 	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
@@ -89,5 +95,6 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+		
 	}
 }
