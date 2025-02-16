@@ -118,6 +118,19 @@ public class NarratorTestClient implements ClientModInitializer {
             }
             return ActionResult.PASS;
         });
+
+        // Trading with villagers event
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
+                player.sendMessage(
+                    Text.literal("[DEBUG] You traded with : " + entity.getName().getString()),
+                    false
+                );
+                NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
+            
+            }
+            return ActionResult.PASS;
+        });
     }
 
     private static boolean isInteractableBlock(Block block) {
