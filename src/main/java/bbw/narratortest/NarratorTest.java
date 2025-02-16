@@ -1,5 +1,6 @@
 package bbw.narratortest;
 
+import net.minecraft.registry.Registries;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -77,6 +78,8 @@ public class NarratorTest implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             DebugCommand.register(dispatcher);
         });
+
+		
         
         // Register entity death event
         ServerLivingEntityEvents.AFTER_DEATH.register((LivingEntity entity, DamageSource damageSource) -> {
@@ -92,7 +95,7 @@ public class NarratorTest implements ModInitializer {
 
         // Register block break event
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-            ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, state.getBlock().getName().getString());
+            ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, Registries.BLOCK.getEntry(state.getBlock()).getIdAsString());
         });
 
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
