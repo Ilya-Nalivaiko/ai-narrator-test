@@ -16,15 +16,34 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class EventCalls {
+    private static boolean wasAlive = true; // Track the player's previous alive state
+
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
     private static boolean itemCraftedFlag = false;
 
     // Called on client tick
     public static void onClientTick(MinecraftClient client) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        ClientPlayerEntity player = client.player;
         if (player != null) {
             itemCrafted(player);
         }
+
+        if (client.player == null) {
+            return; // No player, do nothing
+        }
+
+        // Check if the player was alive and is now dead
+        if (wasAlive && player.isDead()) {
+            onPlayerDeath(player); // Call the custom function
+        }
+
+        // Update the player's alive state
+        wasAlive = !player.isDead();
+    }
+
+    private static void onPlayerDeath(PlayerEntity player) {
+        player.sendMessage(Text.literal("[DEBUG] You died"), false);
+        NarratorTest.eventLogger.appendEvent("Took damage", "and died", System.currentTimeMillis());
     }
 
     private static void itemCrafted(ClientPlayerEntity player) {
