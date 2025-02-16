@@ -23,6 +23,14 @@ public class DebugCommand {
             ClientCommandManager.literal("clearlog")
                 .executes(DebugCommand::executeClear)
         );
+        dispatcher.register(
+            ClientCommandManager.literal("log_collapsed")
+                .executes(DebugCommand::executeLogCollapsed)
+        );
+        dispatcher.register(
+            ClientCommandManager.literal("log_full")
+                .executes(DebugCommand::executeLogFull)
+        );
     }
 
     private static int executeFeedbackCollapsed(CommandContext<FabricClientCommandSource> context) {
@@ -70,6 +78,38 @@ public class DebugCommand {
         
         // Send feedback to the player
         context.getSource().sendFeedback(Text.of("Clear command executed!"));
+        return 1;
+    }
+
+    private static int executeLogFull(CommandContext<FabricClientCommandSource> context){
+        ClientPlayerEntity player = context.getSource().getPlayer();
+
+        if (player != null) {
+            // Do something with the player
+            context.getSource().sendFeedback(Text.of(NarratorTest.eventLogger.dontCollapseEvents()), player);
+        } else {
+            // Handle the case where the command was not executed by a player (e.g., from console)
+            context.getSource().sendError(Text.of("This command can only be executed by a player."));
+        }
+        
+        // Send feedback to the player
+        context.getSource().sendFeedback(Text.of("Feedback command executed!"));
+        return 1;
+    }
+
+    private static int executeLogCollapsed(CommandContext<FabricClientCommandSource> context){
+        ClientPlayerEntity player = context.getSource().getPlayer();
+
+        if (player != null) {
+            // Do something with the player
+            context.getSource().sendFeedback(Text.of(NarratorTest.eventLogger.collapseEvents()), player);
+        } else {
+            // Handle the case where the command was not executed by a player (e.g., from console)
+            context.getSource().sendError(Text.of("This command can only be executed by a player."));
+        }
+        
+        // Send feedback to the player
+        context.getSource().sendFeedback(Text.of("Feedback command executed!"));
         return 1;
     }
 }
