@@ -3,6 +3,8 @@ package bbw.narratortest;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,6 +37,11 @@ public class NarratorTest implements ModInitializer {
 
         // Register server tick event for biome and structure detection
         ServerTickEvents.END_WORLD_TICK.register(ServerEventCalls::onWorldTick);
-    }
 
+        // Register block break event
+        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
+            ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, state.getBlock().getName().getString());
+        });
+
+    }
 }

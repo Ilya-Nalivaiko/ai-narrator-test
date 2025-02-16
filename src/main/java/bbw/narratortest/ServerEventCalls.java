@@ -72,8 +72,14 @@ public class ServerEventCalls {
     // Handles killing entities (server-side)
     public static void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
         player.sendMessage(Text.literal("[DEBUG] You just killed: " + killedEntity.getName().getString()), false);
-		NarratorTest.eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
-	}
+        NarratorTest.eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
+    }
+
+    // Handles block breaking events
+    public static void onBlockBreak(ServerPlayerEntity player, BlockPos pos, String blockName) {
+        player.sendMessage(Text.literal("[DEBUG] You broke a block: " + blockName), false);
+        NarratorTest.eventLogger.appendEvent("Break Block", blockName, System.currentTimeMillis());
+    }
 
     // Gets the structure at a specific position
     private static Identifier getStructureAt(ServerWorld world, BlockPos pos) {
