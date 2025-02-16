@@ -70,53 +70,6 @@ public class ChatGPTTest {
                     .getJSONArray("choices").getJSONObject(0)
                     .getJSONObject("message").getString("content");
 
-            // ✅ Text-to-Speech Processing
-            VoiceManager voiceManager = VoiceManager.getInstance();
-            Voice voice = voiceManager.getVoice("kevin16");
-
-            if (voice == null) {
-                System.out.println("[ERROR] Voice 'kevin16' not found.");
-                return "Error: Voice synthesis failed.";
-            }
-
-            voice.allocate();
-            ByteArrayAudioPlayer audioPlayer = new ByteArrayAudioPlayer(AudioFileFormat.Type.WAVE);
-            voice.setAudioPlayer(audioPlayer);
-            voice.speak(narration);
-            voice.deallocate();
-
-            System.out.println("DONE GENERATING AUDIO");
-
-            byte[] audioBytes = audioPlayer.getAudioBytes();
-            System.out.println("AUDIO BYTES: " + audioBytes.length);
-            System.out.println("Format: " + audioPlayer.getAudioFormat());
-
-            try {
-                ByteArrayOutputStream withHeader = new ByteArrayOutputStream();
-                AudioSystem.write(
-                        new AudioInputStream(
-                                new ByteArrayInputStream(audioBytes),
-                                audioPlayer.getAudioFormat(),
-                                audioBytes.length),
-                        audioPlayer.targetType,
-                        withHeader);
-                byte[] finalBytes = withHeader.toByteArray();
-                          // Wrap the byte buffer in a stream and create an AudioInputStream
-                ByteArrayInputStream bais = new ByteArrayInputStream(finalBytes);
-                AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
-                AudioInputStream ais = new AudioInputStream(bais, format, finalBytes.length);
-
-                // Obtain a Clip, open it, and play
-                Clip clip = AudioSystem.getClip();
-                clip.open(ais);
-                clip.start();
-                // TODO: Insert logic to send `finalBytes` to players if necessary
-                // (e.g., using ServerPlayNetworking)
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
             return narration;
 
         } catch (java.net.SocketTimeoutException e) {

@@ -6,6 +6,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.world.World;
 
 public class DebugCommand {
 
@@ -34,10 +35,11 @@ public class DebugCommand {
 
     private static int executeFeedbackCollapsed(CommandContext<ServerCommandSource> context) {
         ServerPlayerEntity player = context.getSource().getPlayer();
+        World world = context.getSource().getWorld();
 
         if (player != null) {
             // Do something with the player
-            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.collapseEvents(), player);
+            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.collapseEvents(), player, world);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
@@ -50,10 +52,11 @@ public class DebugCommand {
 
     private static int executeFeedbackFull(CommandContext<ServerCommandSource> context) {
         ServerPlayerEntity player = context.getSource().getPlayer();
+        World world = context.getSource().getWorld();
 
         if (player != null) {
             // Do something with the player
-            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.dontCollapseEvents(), player);
+            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.dontCollapseEvents(), player, world);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
