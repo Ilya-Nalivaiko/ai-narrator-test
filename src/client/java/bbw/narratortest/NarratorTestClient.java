@@ -142,21 +142,25 @@ public class NarratorTestClient implements ClientModInitializer {
             }
         });
 
-        // Breeding and taming animals event
+        // Breeding and taming animals, and trading with villagers event
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (entity instanceof AnimalEntity) {
-                player.sendMessage(
-                    Text.literal("[DEBUG] You bred: " + entity.getName().getString()),
-                    false
-                );
-                NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString(), System.currentTimeMillis());
-            
-            }
-            return ActionResult.PASS;
-        });
+                AnimalEntity animal = (AnimalEntity) entity;
+                ItemStack heldItem = player.getStackInHand(hand);
 
-        // Trading with villagers event
-        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+                if (animal.isBreedingItem(heldItem)) {
+                    player.sendMessage(
+                        Text.literal("[DEBUG] You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString()),
+                        false
+                    );
+                    NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
+                } else {
+                    player.sendMessage(
+                        Text.literal("[DEBUG] You tried to breed: " + entity.getName().getString() + " with an invalid item (this was not logged)"),
+                        false
+                    );
+                }
+            }
             if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
                 player.sendMessage(
                     Text.literal("[DEBUG] You traded with : " + entity.getName().getString()),
