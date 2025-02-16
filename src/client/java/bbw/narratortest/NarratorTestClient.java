@@ -93,7 +93,7 @@ public class NarratorTestClient implements ClientModInitializer {
               try {
                 // Wrap the byte buffer in a stream and create an AudioInputStream
                 ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes);
-                AudioFormat format = new AudioFormat(16000, 16, 1, true, true);
+                AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
                 AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length);
 
                 // Obtain a Clip, open it, and play

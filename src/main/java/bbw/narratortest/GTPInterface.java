@@ -3,9 +3,10 @@ package bbw.narratortest;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.world.World;
 
 public class GTPInterface {
-    public static void getGPTFeedback(String prompt, ServerPlayerEntity player){
+    public static void getGPTFeedback(String prompt, ServerPlayerEntity player, World world){
         // Print to console for debugging
         System.out.println("[DEBUG] Sending request to ChatGPT: " + prompt);
         
@@ -23,6 +24,8 @@ public class GTPInterface {
             } else {
                 // Send the GPT-generated narration to the player
                 player.sendMessage(Text.literal(narration), false);
+
+                TTSGenerator.speak(narration, player, world);
             }
         }).exceptionally(ex -> {
             System.out.println("[ERROR] Error in GPT request: " + ex.getMessage());
