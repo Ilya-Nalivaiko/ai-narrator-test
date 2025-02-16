@@ -33,10 +33,7 @@ public class NarratorTest implements ModInitializer {
     @Override
     public void onInitialize() {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
-        LOGGER.info("Hello Fabric world!");
-
-        startTime = System.currentTimeMillis();
-
+        
         ServerMessageEvents.GAME_MESSAGE.register(new AdvancementDetectionHandler());
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {

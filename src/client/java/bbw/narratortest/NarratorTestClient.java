@@ -57,6 +57,10 @@ import java.util.ArrayList;
 public class NarratorTestClient implements ClientModInitializer {
     private static ArrayList<String> armorState = new ArrayList<String>();
 
+    public static void clear(){
+        armorState = new ArrayList<String>();
+    }
+
     @Override
     public void onInitializeClient() {
         for (int i=0; i<4; i++){

@@ -23,6 +23,14 @@ public class EventCalls {
     private static ItemStack lastCraftedItem = ItemStack.EMPTY;
     private static boolean itemCraftedFlag = false;
 
+    public static void clear(){
+        wasAlive = true; // Track the player's previous alive state
+        previousHurtTime = 0;
+
+        lastCraftedItem = ItemStack.EMPTY;
+        itemCraftedFlag = false;
+    }
+
     // Called on client tick
     public static void onClientTick(MinecraftClient client) {
         ClientPlayerEntity player = client.player;
