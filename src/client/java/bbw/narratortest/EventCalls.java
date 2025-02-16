@@ -9,7 +9,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
@@ -56,12 +55,12 @@ public class EventCalls {
     }
 
     private static void onPlayerDamaged(PlayerEntity player, DamageSource source){
-        player.sendMessage(Text.literal("[DEBUG] You took damage from " + source.getName()), false);
+        NarratorTest.sendLogSuccessMessage("You took damage from " + source.getName(), player);
         NarratorTest.eventLogger.appendEvent("Took damage from", source.getName(), System.currentTimeMillis());
     }
 
     private static void onPlayerDeath(PlayerEntity player) {
-        player.sendMessage(Text.literal("[DEBUG] You died"), false);
+        NarratorTest.sendLogSuccessMessage("You died", player);
         NarratorTest.eventLogger.appendEvent("Took damage", "and died", System.currentTimeMillis());
     }
 
@@ -77,7 +76,7 @@ public class EventCalls {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
                         if (!lastCraftedItem.isEmpty()) {
-                            player.sendMessage(Text.literal("[DEBUG] You just crafted: " + lastCraftedItem.getName().getString()), false);
+                            NarratorTest.sendLogSuccessMessage("You just crafted: " + lastCraftedItem.getName().getString(), player);
                             NarratorTest.eventLogger.appendEvent("Craft Item", lastCraftedItem.getName().getString(), System.currentTimeMillis());
                             break;
                         }
@@ -93,7 +92,7 @@ public class EventCalls {
     public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
         // Only log non-block items to avoid duplication with block placement detection
         if (!(stack.getItem() instanceof BlockItem)) {
-            player.sendMessage(Text.literal("[DEBUG] You are using: " + stack.getName().getString()), false);
+            NarratorTest.sendLogSuccessMessage("You are using: " + stack.getName().getString(), player);
             NarratorTest.eventLogger.appendEvent("Use Item", stack.getName().getString(), System.currentTimeMillis());
         }
     }
@@ -101,7 +100,7 @@ public class EventCalls {
     // Handles attacking entities
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
-            player.sendMessage(Text.literal("[DEBUG] You just hit: " + entity.getName().getString()), false);
+            NarratorTest.sendLogSuccessMessage("You just hit: " + entity.getName().getString(), player);
             NarratorTest.eventLogger.appendEvent("Hit Entity", entity.getName().getString(), System.currentTimeMillis());
         }
         return ActionResult.PASS;

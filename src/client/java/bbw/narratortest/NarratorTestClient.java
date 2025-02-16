@@ -56,6 +56,11 @@ import java.util.ArrayList;
 public class NarratorTestClient implements ClientModInitializer {
     private static ArrayList<String> armorState = new ArrayList<String>();
 
+    private static long nextAllowedBlockUse = 0;
+    private static long nextAllowedBlockPlace = 0;
+    private static long nextAllowedTrade = 0;
+    private static long nextAllowedBreed = 0;
+
     public static void clear(){
         armorState = new ArrayList<String>();
     }
@@ -88,17 +93,23 @@ public class NarratorTestClient implements ClientModInitializer {
 
                 // Check if the block is interactable (e.g., chest, furnace)
                 if (isInteractableBlock(interactedBlock)) {
-                    // Log the block interaction
-                    NarratorTest.sendDebugMessage("You interacted with a block: " + interactedBlock.getName().getString() + " at " + interactedPos.toShortString(), player);
-                    NarratorTest.eventLogger.appendEvent("Interact Block", interactedBlock.getName().getString(), System.currentTimeMillis());
-                } else {
+                    if(System.currentTimeMillis() > nextAllowedBlockUse){
+                        // Log the block interaction
+                        NarratorTest.sendLogSuccessMessage("You interacted with a block: " + interactedBlock.getName().getString() + " at " + interactedPos.toShortString(), player);
+                        NarratorTest.eventLogger.appendEvent("Interact Block", interactedBlock.getName().getString(), System.currentTimeMillis());
+                        nextAllowedBlockUse = System.currentTimeMillis() + 150;
+                    } else NarratorTest.sendLogFailMessage("Remaining block interaction cooldown: " + Long.toString(nextAllowedBlockUse-System.currentTimeMillis()), player);
+                    } else {
                     // Check if the player is placing a block
                     ItemStack stack = player.getStackInHand(hand);
                     if (stack.getItem() instanceof BlockItem) {
-                        BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
-                        NarratorTest.sendDebugMessage("You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString(), player);
-                        NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(), System.currentTimeMillis());
-                    }
+                        if(System.currentTimeMillis() > nextAllowedBlockPlace){
+                            BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
+                            NarratorTest.sendLogSuccessMessage("You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString(), player);
+                            NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(), System.currentTimeMillis());
+                            nextAllowedBlockPlace = System.currentTimeMillis() + 190;
+                        } else NarratorTest.sendLogFailMessage("Remaining block place cooldown: " + Long.toString(nextAllowedBlockPlace-System.currentTimeMillis()), player);
+                        }
                 }
             }
             return ActionResult.PASS; // Allow the interaction to proceed
@@ -113,11 +124,11 @@ public class NarratorTestClient implements ClientModInitializer {
                 for (ItemStack stack : player.getArmorItems()) {
                     if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
                         armorState.set(i, stack.getName().getString());
-                        NarratorTest.sendDebugMessage("You equipped: " + stack.getName().getString(), player);
+                        NarratorTest.sendLogSuccessMessage("You equipped: " + stack.getName().getString(), player);
                         NarratorTest.eventLogger.appendEvent("Equip", stack.getName().getString(), System.currentTimeMillis());
                         
                     } else if (stack.isEmpty() && !armorState.get(i).isEmpty()){
-                        NarratorTest.sendDebugMessage("You unequipped: " + armorState.get(i), player);
+                        NarratorTest.sendLogSuccessMessage("You unequipped: " + armorState.get(i), player);
                         NarratorTest.eventLogger.appendEvent("Unequip", armorState.get(i), System.currentTimeMillis());
                         armorState.set(i, "");
                     }
@@ -133,16 +144,23 @@ public class NarratorTestClient implements ClientModInitializer {
                 ItemStack heldItem = player.getStackInHand(hand);
 
                 if (animal.isBreedingItem(heldItem)) {
-                    NarratorTest.sendDebugMessage("You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString(), player);
-                    NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
+                    if(System.currentTimeMillis() > nextAllowedBreed){
+                        NarratorTest.sendLogSuccessMessage("You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString(), player);
+                        NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
+                        nextAllowedBreed = System.currentTimeMillis() + 300;
+                    } else NarratorTest.sendLogFailMessage("Remaining breed cooldown: " + Long.toString(nextAllowedBreed-System.currentTimeMillis()), player);
+                    
                 } else {
-                    NarratorTest.sendDebugMessage("You tried to breed: " + entity.getName().getString() + " with an invalid item (this was not logged)", player);
+                    NarratorTest.sendLogFailMessage("You tried to breed: " + entity.getName().getString() + " with an invalid item", player);
                 }
             }
             if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
-                NarratorTest.sendDebugMessage("You traded with : " + entity.getName().getString(), player);
-                NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
-            
+                if(System.currentTimeMillis() > nextAllowedTrade){
+                    NarratorTest.sendLogSuccessMessage("You traded with : " + entity.getName().getString(), player);
+                    NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
+                    nextAllowedTrade = System.currentTimeMillis() + 500;
+                } else NarratorTest.sendLogFailMessage("Remaining trade cooldown: " + Long.toString(nextAllowedTrade-System.currentTimeMillis()), player);
+                
             }
             return ActionResult.PASS;
         });

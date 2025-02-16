@@ -58,20 +58,20 @@ public class ServerEventCalls {
     private static void onBiomeChange(ServerPlayerEntity player, RegistryKey<Biome> biomeKey) {
         Identifier biomeId = biomeKey.getValue();
         String biomeName = biomeId.getPath(); // e.g., "plains", "desert"
-        NarratorTest.sendDebugMessage("You entered the " + biomeName + " biome!", player);
+        NarratorTest.sendLogSuccessMessage("You entered the " + biomeName + " biome!", player);
 		NarratorTest.eventLogger.appendEvent("Enter Biome", biomeName, System.currentTimeMillis());
     }
 
     // Handles structure enter events
     private static void onStructureEnter(ServerPlayerEntity player, Identifier structureId) {
         String structureName = structureId.getPath(); // e.g., "village", "stronghold"
-        NarratorTest.sendDebugMessage("You entered a " + structureName + "!", player);
+        NarratorTest.sendLogSuccessMessage("You entered a " + structureName + "!", player);
 		NarratorTest.eventLogger.appendEvent("Enter Structure", structureName, System.currentTimeMillis());
     }
 
     // Handles killing entities (server-side)
     public static void onEntityKill(PlayerEntity player, ServerWorld world, LivingEntity killedEntity, DamageSource source) {
-        NarratorTest.sendDebugMessage("You just killed: " + killedEntity.getName().getString(), player);
+        NarratorTest.sendLogSuccessMessage("You just killed: " + killedEntity.getName().getString(), player);
         NarratorTest.eventLogger.appendEvent("Kill Entity", killedEntity.getName().getString(), System.currentTimeMillis());
     }
 
@@ -80,7 +80,7 @@ public class ServerEventCalls {
         ItemStack heldItem = player.getMainHandStack();
         String toolName = heldItem.isEmpty() ? "hands" : heldItem.getName().getString();
 
-        NarratorTest.sendDebugMessage("You broke a block: " + blockName + " with " + toolName, player);
+        NarratorTest.sendLogSuccessMessage("You broke a block: " + blockName + " with " + toolName, player);
         NarratorTest.eventLogger.appendEvent("Break Block", blockName + " with " + toolName, System.currentTimeMillis());
     }
 

@@ -63,9 +63,18 @@ public class NarratorTest implements ModInitializer {
 
     }
 
-    public static void sendDebugMessage(String message, PlayerEntity player){
+    public static void sendLogSuccessMessage(String message, PlayerEntity player){
         if (ModConfig.getConfig().debugLevel == 2){
-            player.sendMessage(Text.literal("[DEBUG] " + message), false);
+            player.sendMessage(Text.literal("[LOGGED] " + message), false);
+        }
+        if (ModConfig.getConfig().debugLevel >= 1){
+            LOGGER.debug(message);
+        }
+    }
+
+    public static void sendLogFailMessage(String message, PlayerEntity player){
+        if (ModConfig.getConfig().debugLevel == 2){
+            player.sendMessage(Text.literal("[NOT LOGGED] " + message), false);
         }
         if (ModConfig.getConfig().debugLevel >= 1){
             LOGGER.debug(message);
