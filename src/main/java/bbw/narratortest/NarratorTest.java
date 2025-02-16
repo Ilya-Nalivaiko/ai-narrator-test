@@ -62,5 +62,8 @@ public class NarratorTest implements ModInitializer {
         if (ModConfig.getConfig().debugLevel == 2){
             player.sendMessage(Text.literal("[DEBUG] " + message), false);
         }
+        if (ModConfig.getConfig().debugLevel >= 1){
+            LOGGER.debug(message);
+        }
     }
 }
