@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+
+
 public class NarratorTest implements ModInitializer {
 	public static EventLogger eventLogger = new EventLogger();
 
@@ -24,6 +27,10 @@ public class NarratorTest implements ModInitializer {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         LOGGER.info("Hello Fabric world!");
 
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            NarratorConfigCommand.register(dispatcher);
+        });
+        
         // Register entity death event
         ServerLivingEntityEvents.AFTER_DEATH.register((LivingEntity entity, DamageSource damageSource) -> {
             if (damageSource.getAttacker() instanceof PlayerEntity) {

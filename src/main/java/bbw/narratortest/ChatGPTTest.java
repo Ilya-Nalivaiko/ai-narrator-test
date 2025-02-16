@@ -1,15 +1,15 @@
 package bbw.narratortest;
 
+import bbw.narratortest.config.ModConfig;
 import org.json.JSONObject;
 import okhttp3.*;
 
 public class ChatGPTTest {
-    // Load API key from environment variable
     private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
 
-    // Debug: Print API key status
     static {
         System.out.println("[DEBUG] OPENAI_API_KEY: " + (OPENAI_API_KEY == null ? "NULL" : "Loaded Successfully"));
+        ModConfig.loadConfig(); // ✅ Load the config at startup
     }
 
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -23,11 +23,15 @@ public class ChatGPTTest {
             return "Error: Missing OpenAI API key.";
         }
 
+        // ✅ Read values from config
+        double temperature = ModConfig.getConfig().temperature;
+        String systemPrompt = ModConfig.getConfig().systemPrompt;
+
         JSONObject json = new JSONObject();
         json.put("model", "gpt-4");
-        json.put("temperature", 0.3); 
+        json.put("temperature", temperature); 
         json.put("messages", new Object[]{
-                new JSONObject().put("role", "system").put("content", "You are a backseat gaming minecraft player. You are very opiniated and mean. Keep it max 2 sentences, unless the player really makes a mistake like making a diamond hoe."),
+                new JSONObject().put("role", "system").put("content", systemPrompt),
                 new JSONObject().put("role", "user").put("content", input)
         });
 
