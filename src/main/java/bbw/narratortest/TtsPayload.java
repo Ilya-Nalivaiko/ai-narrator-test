@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 
 public record TtsPayload(BlockPos pos, byte[] audioData) implements CustomPayload {
 
-    public static final CustomPayload.Id<TtsPayload> ID = new CustomPayload.Id<>(TTSNetworkConstants.TTS_PACKET_ID);
+    public static final CustomPayload.Id<TtsPayload> ID = new CustomPayload.Id<>(NarratorNetworkConstants.TTS_PACKET_ID);
     public static final PacketCodec<RegistryByteBuf, TtsPayload> CODEC = PacketCodec.tuple(BlockPos.PACKET_CODEC,
             TtsPayload::pos, PacketCodecs.BYTE_ARRAY, TtsPayload::audioData, TtsPayload::new);
 

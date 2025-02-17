@@ -17,6 +17,7 @@ public class ModConfig {
         public int debugLevel = 1;
         public int narratorCooldown = 1000000;
         public int maxEvents = 40;
+        public boolean useElevenLabs = false;
     }
 
     private static ConfigData config = new ConfigData();

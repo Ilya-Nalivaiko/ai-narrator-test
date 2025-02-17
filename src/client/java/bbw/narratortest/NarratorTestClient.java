@@ -57,11 +57,16 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.Text;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import bbw.narratortest.config.ModConfig;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
@@ -142,7 +147,7 @@ public class NarratorTestClient implements ClientModInitializer {
                 // play the sound using minecraft's sound system
                 Random random = Random.create();
                 context.client().getSoundManager().play(
-                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 1.0F, 1.0F, random, position));
+                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 2.0F, 1.0F, random, position));
 
               } else {
                 System.err.println("Move failed: " + oggName + " does not exist");
@@ -184,14 +189,14 @@ public class NarratorTestClient implements ClientModInitializer {
         if (isInteractableBlock(interactedBlock)) {
           if (System.currentTimeMillis() > nextAllowedBlockUse) {
             // Log the block interaction
-            NarratorTest.sendLogSuccessMessage("You interacted with a block: "
+            NarratorTestClient.sendLogSuccessMessage("You interacted with a block: "
                 + Registries.BLOCK.getEntry(interactedBlock).getIdAsString() + " at " + interactedPos.toShortString(),
                 player);
-            NarratorTest.addEvent(player, "Interact Block", Registries.BLOCK.getEntry(interactedBlock).getIdAsString(),
+            NarratorTestClient.addEvent(player, "Interact Block", Registries.BLOCK.getEntry(interactedBlock).getIdAsString(),
                 System.currentTimeMillis());
             nextAllowedBlockUse = System.currentTimeMillis() + 150;
           } else
-            NarratorTest.sendLogFailMessage("Remaining block interaction cooldown: "
+            NarratorTestClient.sendLogFailMessage("Remaining block interaction cooldown: "
                 + Long.toString(nextAllowedBlockUse - System.currentTimeMillis()), player);
         } else {
           // Check if the player is placing a block
@@ -199,13 +204,13 @@ public class NarratorTestClient implements ClientModInitializer {
           if (stack.getItem() instanceof BlockItem) {
             if (System.currentTimeMillis() > nextAllowedBlockPlace) {
               BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
-              NarratorTest.sendLogSuccessMessage("You placed a block: " + stack.getRegistryEntry().getIdAsString()
+              NarratorTestClient.sendLogSuccessMessage("You placed a block: " + stack.getRegistryEntry().getIdAsString()
                   + " at " + placementPos.toShortString(), player);
-              NarratorTest.addEvent(player, "Place Block", stack.getRegistryEntry().getIdAsString(),
+              NarratorTestClient.addEvent(player, "Place Block", stack.getRegistryEntry().getIdAsString(),
                   System.currentTimeMillis());
               nextAllowedBlockPlace = System.currentTimeMillis() + 190;
             } else
-              NarratorTest.sendLogFailMessage("Remaining block place cooldown: "
+              NarratorTestClient.sendLogFailMessage("Remaining block place cooldown: "
                   + Long.toString(nextAllowedBlockPlace - System.currentTimeMillis()), player);
           }
         }
@@ -221,13 +226,13 @@ public class NarratorTestClient implements ClientModInitializer {
         for (ItemStack stack : player.getArmorItems()) {
           if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
             armorState.set(i, stack.getRegistryEntry().getIdAsString());
-            NarratorTest.sendLogSuccessMessage("You equipped: " + stack.getRegistryEntry().getIdAsString(), player);
-            NarratorTest.addEvent(player, "Equip", stack.getRegistryEntry().getIdAsString(),
+            NarratorTestClient.sendLogSuccessMessage("You equipped: " + stack.getRegistryEntry().getIdAsString(), player);
+            NarratorTestClient.addEvent(player, "Equip", stack.getRegistryEntry().getIdAsString(),
                 System.currentTimeMillis());
 
           } else if (stack.isEmpty() && !armorState.get(i).isEmpty()) {
-            NarratorTest.sendLogSuccessMessage("You unequipped: " + armorState.get(i), player);
-            NarratorTest.addEvent(player, "Unequip", armorState.get(i), System.currentTimeMillis());
+            NarratorTestClient.sendLogSuccessMessage("You unequipped: " + armorState.get(i), player);
+            NarratorTestClient.addEvent(player, "Unequip", armorState.get(i), System.currentTimeMillis());
             armorState.set(i, "");
           }
           i++;
@@ -243,30 +248,30 @@ public class NarratorTestClient implements ClientModInitializer {
 
         if (animal.isBreedingItem(heldItem)) {
           if (System.currentTimeMillis() > nextAllowedBreed) {
-            NarratorTest
+            NarratorTestClient
                 .sendLogSuccessMessage("You bred: " + Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString()
                     + " using " + heldItem.getName().getString(), player);
-            NarratorTest.addEvent(player, "Bred", Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString()
+            NarratorTestClient.addEvent(player, "Bred", Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString()
                 + " using " + heldItem.getName().getString(), System.currentTimeMillis());
             nextAllowedBreed = System.currentTimeMillis() + 300;
           } else
-            NarratorTest.sendLogFailMessage(
+            NarratorTestClient.sendLogFailMessage(
                 "Remaining breed cooldown: " + Long.toString(nextAllowedBreed - System.currentTimeMillis()), player);
 
         } else {
-          NarratorTest.sendLogFailMessage("You tried to breed: "
+          NarratorTestClient.sendLogFailMessage("You tried to breed: "
               + Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString() + " with an invalid item", player);
         }
       }
       if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
         if (System.currentTimeMillis() > nextAllowedTrade) {
-          NarratorTest.sendLogSuccessMessage(
+          NarratorTestClient.sendLogSuccessMessage(
               "You traded with : " + Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString(), player);
-          NarratorTest.addEvent(player, "Traded with",
+          NarratorTestClient.addEvent(player, "Traded with",
               Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString(), System.currentTimeMillis());
           nextAllowedTrade = System.currentTimeMillis() + 500;
         } else
-          NarratorTest.sendLogFailMessage(
+          NarratorTestClient.sendLogFailMessage(
               "Remaining trade cooldown: " + Long.toString(nextAllowedTrade - System.currentTimeMillis()), player);
 
       }
@@ -312,5 +317,38 @@ public class NarratorTestClient implements ClientModInitializer {
         block instanceof JigsawBlock || // Jigsaw blocks
         block instanceof AbstractSignBlock || // Signs
         block instanceof AbstractBannerBlock; // Banners
+  }
+
+  public static void addEvent(PlayerEntity player, String type, String extra, long time) {
+      ClientPlayNetworking.send(new EventPayload(type, extra, time));
+  }
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(NarratorTest.MOD_ID);
+
+  public static void sendLogSuccessMessage(String message, PlayerEntity player) {
+      if (ModConfig.getConfig().debugLevel == 2) {
+          player.sendMessage(Text.literal("[LOGGED] " + message), false);
+      }
+      if (ModConfig.getConfig().debugLevel == 1) {
+          LOGGER.info(message);
+      }
+  }
+
+  public static void sendLogFailMessage(String message, PlayerEntity player) {
+      if (ModConfig.getConfig().debugLevel == 2) {
+          player.sendMessage(Text.literal("[NOT LOGGED] " + message), false);
+      }
+      if (ModConfig.getConfig().debugLevel == 1) {
+          LOGGER.info(message);
+      }
+  }
+
+  public static void sendRequestInfoMessage(String message, PlayerEntity player) {
+      if (ModConfig.getConfig().debugLevel == 2) {
+          player.sendMessage(Text.literal("[REQUEST] " + message), false);
+      }
+      if (ModConfig.getConfig().debugLevel == 1) {
+          LOGGER.info(message);
+      }
   }
 }

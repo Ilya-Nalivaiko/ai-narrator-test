@@ -57,13 +57,13 @@ public class EventCalls {
     }
 
     private static void onPlayerDamaged(PlayerEntity player, DamageSource source){
-        NarratorTest.sendLogSuccessMessage("You took damage from " + source.getTypeRegistryEntry().getIdAsString(), player);
-        NarratorTest.addEvent(player, "Took damage from", source.getTypeRegistryEntry().getIdAsString(), System.currentTimeMillis());
+        NarratorTestClient.sendLogSuccessMessage("You took damage from " + source.getTypeRegistryEntry().getIdAsString(), player);
+        NarratorTestClient.addEvent(player, "Took damage from", source.getTypeRegistryEntry().getIdAsString(), System.currentTimeMillis());
     }
 
     private static void onPlayerDeath(PlayerEntity player) {
-        NarratorTest.sendLogSuccessMessage("You died", player);
-        NarratorTest.addEvent(player, "Died", "death", System.currentTimeMillis());
+        NarratorTestClient.sendLogSuccessMessage("You died", player);
+        NarratorTestClient.addEvent(player, "Died", "death", System.currentTimeMillis());
     }
 
     private static void itemCrafted(ClientPlayerEntity player) {
@@ -78,8 +78,8 @@ public class EventCalls {
                 for (ItemStack stack : player.getInventory().main) {
                     if (ItemStack.areEqual(stack, lastCraftedItem)) {
                         if (!lastCraftedItem.isEmpty()) {
-                            NarratorTest.sendLogSuccessMessage("You just crafted: " + lastCraftedItem.getRegistryEntry().getIdAsString(), player);
-                            NarratorTest.addEvent(player, "Craft Item", lastCraftedItem.getRegistryEntry().getIdAsString(), System.currentTimeMillis());
+                            NarratorTestClient.sendLogSuccessMessage("You just crafted: " + lastCraftedItem.getRegistryEntry().getIdAsString(), player);
+                            NarratorTestClient.addEvent(player, "Craft Item", lastCraftedItem.getRegistryEntry().getIdAsString(), System.currentTimeMillis());
                             break;
                         }
 
@@ -95,8 +95,8 @@ public class EventCalls {
     public static void onStartUsingItem(ItemStack stack, World world, PlayerEntity player) {
         // Only log non-block items to avoid duplication with block placement detection
         if (!(stack.getItem() instanceof BlockItem)) {
-            NarratorTest.sendLogSuccessMessage("You are using: " + stack.getRegistryEntry().getIdAsString(), player);
-            NarratorTest.addEvent(player, "Use Item", stack.getRegistryEntry().getIdAsString(), System.currentTimeMillis());
+            NarratorTestClient.sendLogSuccessMessage("You are using: " + stack.getRegistryEntry().getIdAsString(), player);
+            NarratorTestClient.addEvent(player, "Use Item", stack.getRegistryEntry().getIdAsString(), System.currentTimeMillis());
         }
     }
 
@@ -104,8 +104,8 @@ public class EventCalls {
     public static ActionResult onEntityDamage(PlayerEntity player, World world, Hand hand, Entity entity,
             @Nullable EntityHitResult hitResult) {
         if (entity instanceof LivingEntity) {
-            NarratorTest.sendLogSuccessMessage("You just hit: " + Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString() + " with " + player.getMainHandStack().getRegistryEntry().getIdAsString(), player);
-            NarratorTest.addEvent(player, "Hit Entity", Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString() + " with " + player.getMainHandStack().getRegistryEntry().getIdAsString(), System.currentTimeMillis());
+            NarratorTestClient.sendLogSuccessMessage("You just hit: " + Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString() + " with " + player.getMainHandStack().getRegistryEntry().getIdAsString(), player);
+            NarratorTestClient.addEvent(player, "Hit Entity", Registries.ENTITY_TYPE.getEntry(entity.getType()).getIdAsString() + " with " + player.getMainHandStack().getRegistryEntry().getIdAsString(), System.currentTimeMillis());
         }
         return ActionResult.PASS;
     }

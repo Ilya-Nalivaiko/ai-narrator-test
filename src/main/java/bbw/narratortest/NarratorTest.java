@@ -14,6 +14,8 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,6 +35,11 @@ public class NarratorTest implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static void addEvent(PlayerEntity player, String type, String extra, long time){
+		if (player.getWorld().isClient){
+			return;
+		}
+
+
 		EventLogger logger = eventLoggerMap.get(player.getUuidAsString());
 		if (logger == null){
 			logger = new EventLogger();
@@ -104,50 +111,16 @@ public class NarratorTest implements ModInitializer {
 		System.setProperty("freetts.voices",
 				"com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
 
-
-		// UseItemCallback.EVENT.register((player, world, hand) -> {
-		// 	if (!world.isClient && player instanceof ServerPlayerEntity serverPlayer) {
-		// 		VoiceManager voiceManager = VoiceManager.getInstance();
-		// 		Voice voice = voiceManager.getVoice("kevin16");
-		// 		voice.allocate();
-		// 		ByteArrayAudioPlayer audioPlayer = new ByteArrayAudioPlayer(AudioFileFormat.Type.WAVE);
-		// 		voice.setAudioPlayer(audioPlayer);
-		// 		voice.speak("This is a test of the text to speech capabilities");
-		// 		voice.deallocate();
-
-		// 		System.out.println("DONE GENERATING AUDIO");
-
-		// 		byte[] audioBytes = audioPlayer.getAudioBytes();
-		// 		System.out.println("AUDIO BYTES: " + audioBytes.length);
-		// 		System.out.println("Format:" + audioPlayer.getAudioFormat());
-
-		// 		try {
-		// 			ByteArrayOutputStream withHeader = new ByteArrayOutputStream();
-		// 			AudioSystem.write(
-		// 					new AudioInputStream(
-		// 							new ByteArrayInputStream(audioBytes),
-		// 							audioPlayer.getAudioFormat(),
-		// 							audioBytes.length),
-		// 					audioPlayer.targetType,
-		// 					withHeader);
-		// 			byte[] finalBytes = withHeader.toByteArray();
-					// // Send to nearby players
-					// world.getPlayers().stream()
-					// 		.filter(p -> p.getBlockPos().isWithinDistance(player.getBlockPos(), 20))
-					// 		.forEach(nearbyPlayer -> {
-					// 			System.out.println("Sending audio to player: " +
-					// 					nearbyPlayer.getName().getString());
-					// 			ServerPlayNetworking.send((ServerPlayerEntity) nearbyPlayer,
-					// 					new TtsPayload(player.getBlockPos(), finalBytes));
-					// 		});
-
-		// 		} catch (Exception e) {
-		// 			e.printStackTrace();
-		// 		}
-
-		// 	}
-		// 	return ActionResult.PASS;
-		// });
+		// allow client to send events to server for AI to critique
+		PayloadTypeRegistry.playC2S().register(EventPayload.ID, EventPayload.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(EventPayload.ID, (payload, context) -> {
+			String type = payload.type();
+			String extra = payload.extra();
+			long time = payload.time();
+			PlayerEntity player = (PlayerEntity) context.player();
+			addEvent(player, type, extra, time);
+			sendLogSuccessMessage(type + ": " + extra, player);
+		});
 	}
 
     public static void sendLogSuccessMessage(String message, PlayerEntity player){

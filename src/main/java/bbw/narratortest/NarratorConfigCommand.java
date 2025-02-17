@@ -6,6 +6,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -73,6 +74,17 @@ public class NarratorConfigCommand {
                     .executes(ctx -> {
                         String prompt = StringArgumentType.getString(ctx, "value");
                         TTSGenerator.speak(prompt, ctx.getSource().getPlayer(), ctx.getSource().getWorld());
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
+            )
+            .then(CommandManager.literal("useElevenLabs")
+                .then(CommandManager.argument("value", BoolArgumentType.bool())
+                    .executes(ctx -> {
+                        boolean value = BoolArgumentType.getBool(ctx, "value");
+                        ModConfig.getConfig().useElevenLabs = value;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Narrator prompt updated!"), false);
                         return Command.SINGLE_SUCCESS;
                     })
                 )
