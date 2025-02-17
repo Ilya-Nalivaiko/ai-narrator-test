@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.decoration.ArmorStandEntity;
@@ -87,16 +88,17 @@ public class TTSGenerator {
     System.out.println("head summoned");
 
     if (ModConfig.getConfig().useElevenLabs) {
-      speakWithElevenlabs(text, player, world);
+      speakWithElevenlabs(text, player, world, armorStand);
     } else {
-      speakWithFreeTTS(text, player, world);
+      speakWithFreeTTS(text, player, world, armorStand);
     }
   }
 
   public static void speakWithElevenlabs(
     String text,
     PlayerEntity player,
-    World world
+    World world,
+    ArmorStandEntity narratorEntity
   ) {
     try {
       if (ELEVENLABS_API_KEY == null || ELEVENLABS_API_KEY.isEmpty()) {
@@ -133,7 +135,7 @@ public class TTSGenerator {
         byte[] audioBytes = response.body().bytes();
         System.out.println("AUDIO BYTES: " + audioBytes.length);
 
-        sendAudioToPlayers(audioBytes, player, world, false);
+        sendAudioToPlayers(audioBytes, player, world, false, narratorEntity);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -145,7 +147,8 @@ public class TTSGenerator {
   public static void speakWithFreeTTS(
     String text,
     PlayerEntity player,
-    World world
+    World world,
+    ArmorStandEntity narratorEntity
   ) {
     // // ✅ Text-to-Speech Processing
     VoiceManager voiceManager = VoiceManager.getInstance();
@@ -171,14 +174,15 @@ public class TTSGenerator {
     System.out.println("AUDIO BYTES: " + audioBytes.length);
     System.out.println("Format: " + audioPlayer.getAudioFormat());
 
-    sendAudioToPlayers(audioBytes, player, world, true);
+    sendAudioToPlayers(audioBytes, player, world, true, narratorEntity);
   }
 
   private static void sendAudioToPlayers(
     byte[] audioBytes,
     PlayerEntity player,
     World world,
-    boolean bigEndian
+    boolean bigEndian,
+    ArmorStandEntity narratorEntity
   ) {
     try {
       ByteArrayOutputStream withHeader = new ByteArrayOutputStream();
@@ -203,7 +207,7 @@ public class TTSGenerator {
           );
           ServerPlayNetworking.send(
             (ServerPlayerEntity) nearbyPlayer,
-            new TtsPayload(player.getBlockPos(), finalBytes)
+            new TtsPayload(narratorEntity.getId(), finalBytes)
           );
         });
     } catch (Exception e) {

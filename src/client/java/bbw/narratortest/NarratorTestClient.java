@@ -51,6 +51,8 @@ import net.minecraft.block.StructureBlock;
 import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -94,11 +96,13 @@ public class NarratorTestClient implements ClientModInitializer {
     ClientPlayNetworking.registerGlobalReceiver(
         TtsPayload.ID,
         (payload, context) -> {
-
-          {
-
-            // Read the remaining bytes (which contain your audio data)
-            BlockPos position = payload.pos();
+          Entity narratorEntityRaw = context.client().world.getEntityById(payload.entityId());
+          if (narratorEntityRaw == null || narratorEntityRaw.getClass() != ArmorStandEntity.class) {
+            System.err.println("Narrator entity not found");
+            return;
+          }
+          ArmorStandEntity narratorEntity = (ArmorStandEntity) narratorEntityRaw;
+            
             byte[] audioBytes = payload.audioData();
             int channelIndex = nextChannel;
             nextChannel = (nextChannel + 1);
@@ -145,9 +149,8 @@ public class NarratorTestClient implements ClientModInitializer {
                 }
                 newChannelContent.renameTo(oldChannelContent);
                 // play the sound using minecraft's sound system
-                Random random = Random.create();
                 context.client().getSoundManager().play(
-                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 2.0F, 1.0F, random, position));
+                    new NarratorSoundInstance(narratorEntity, soundEvent));
 
               } else {
                 System.err.println("Move failed: " + oggName + " does not exist");
@@ -158,7 +161,7 @@ public class NarratorTestClient implements ClientModInitializer {
             } catch (InterruptedException e) {
               e.printStackTrace();
             }
-          }
+          
         });
 
     for (int i = 0; i < 4; i++) {
