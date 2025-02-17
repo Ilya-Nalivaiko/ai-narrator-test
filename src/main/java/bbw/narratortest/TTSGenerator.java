@@ -18,6 +18,15 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+
+
 public class TTSGenerator {
   private TTSGenerator() {
     // private empty constructor to avoid accidental instantiation
@@ -31,9 +40,15 @@ public class TTSGenerator {
 
   public static void speak(String text, PlayerEntity player, World world) {
 
-    if (!world.isClient) { // ✅ Make sure this runs only on the server
-      spawnNarratorArmorStand(player, world);
-    }
+    if (!world.isClient) {
+      // Pass whichever head item you want
+      ArmorStandEntity armorStand = spawnNarratorArmorStand(player, world, Items.CREEPER_HEAD);
+
+      // Optionally despawn it after 5 seconds
+      if (armorStand != null) {
+          despawnNarratorArmorStand(armorStand, 20);
+      }
+  }
 
 
     // ✅ Text-to-Speech Processing
@@ -82,22 +97,46 @@ public class TTSGenerator {
     }
 
   }
-private static void spawnNarratorArmorStand(PlayerEntity player, World world) {
-    if (!(player instanceof ServerPlayerEntity)) {
-      return; // ✅ Prevent running on the client
-    }
-    
-    Vec3d playerPos = player.getPos(); // Get player's position
+  
+  private static ArmorStandEntity spawnNarratorArmorStand(PlayerEntity player, World world, Item headItem) {
+    if (!(player instanceof ServerPlayerEntity)) return null;
+
+    Vec3d playerPos = player.getPos();
     ArmorStandEntity armorStand = new ArmorStandEntity(EntityType.ARMOR_STAND, world);
-    armorStand.refreshPositionAndAngles(playerPos.getX(), playerPos.getY(), playerPos.getZ(), 0, 0);
-    armorStand.setCustomName(player.getName()); // Name it after the player
+    armorStand.refreshPositionAndAngles(playerPos.x, playerPos.y, playerPos.z, 0, 0);
+    armorStand.setCustomName(player.getName());
     armorStand.setCustomNameVisible(true);
     armorStand.setInvisible(false); // Set to `true` if you want it invisible
     armorStand.setNoGravity(true); // Makes it float in place
 
-    world.spawnEntity(armorStand); // ✅ Spawns the Armor Stand in the world
-    System.out.println("✅ Spawned Armor Stand for " + player.getName().getString());
-  }
+    // Equip the Armor Stand with the chosen mob head, e.g. Items.ZOMBIE_HEAD or Items.SKELETON_SKULL
+    if (headItem != null) {
+        armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(headItem));
+    } else {
+        // Fallback if headItem was null
+        armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.CREEPER_HEAD));
+    }
 
+    world.spawnEntity(armorStand);
+    System.out.println("✅ Spawned Armor Stand for " + player.getName().getString());
+    return armorStand;
+}
+
+
+
+  
+  private static void despawnNarratorArmorStand(ArmorStandEntity armorStand, int delaySeconds) {
+      if (armorStand == null || armorStand.isRemoved()) return;
+  
+      // Run only on server side
+      if (!armorStand.getEntityWorld().isClient()) {
+          CompletableFuture.delayedExecutor(delaySeconds, TimeUnit.SECONDS).execute(() -> {
+              if (!armorStand.isRemoved()) {
+                  armorStand.discard(); // Properly removes the entity
+                  System.out.println("❌ Despawned Armor Stand: " + armorStand.getCustomName());
+              }
+          });
+      }
+  }
 
 }
