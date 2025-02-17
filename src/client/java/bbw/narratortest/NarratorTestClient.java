@@ -1,6 +1,13 @@
 package bbw.narratortest;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import net.minecraft.util.math.random.Random;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -52,10 +59,16 @@ import net.minecraft.block.StonecutterBlock;
 import net.minecraft.block.StructureBlock;
 import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sound.Sound;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
@@ -64,20 +77,22 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 public class NarratorTestClient implements ClientModInitializer {
-    private static ArrayList<String> armorState = new ArrayList<String>();
+  private int nextChannel = 0;
 
-    private static long nextAllowedBlockUse = 0;
-    private static long nextAllowedBlockPlace = 0;
-    private static long nextAllowedTrade = 0;
-    private static long nextAllowedBreed = 0;
+  private static ArrayList<String> armorState = new ArrayList<String>();
 
-    public static void clear(){
-        armorState = new ArrayList<String>();
-    }
+  private static long nextAllowedBlockUse = 0;
+  private static long nextAllowedBlockPlace = 0;
+  private static long nextAllowedTrade = 0;
+  private static long nextAllowedBreed = 0;
 
-    @Override
-    public void onInitializeClient() {
-        ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
+  public static void clear() {
+    armorState = new ArrayList<String>();
+  }
+
+  @Override
+  public void onInitializeClient() {
+    ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
     CustomSounds.initialize();
 
     // TTS audio stuff
@@ -87,170 +102,223 @@ public class NarratorTestClient implements ClientModInitializer {
         (payload, context) -> {
 
           {
+
             // Read the remaining bytes (which contain your audio data)
+            BlockPos position = payload.pos();
             byte[] audioBytes = payload.audioData();
-            context.client().execute(() -> {
-              try {
-                // Wrap the byte buffer in a stream and create an AudioInputStream
-                ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes);
-                AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
-                AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length);
+            int channelIndex = nextChannel;
+            nextChannel = (nextChannel + 1);
+            if (nextChannel > 6) {
+              nextChannel = 0;
+              context.client().getSoundManager().reloadSounds();
+            }
 
-                // Obtain a Clip, open it, and play
-                Clip clip = AudioSystem.getClip();
-                clip.open(ais);
-                clip.start();
-
-
-              } catch (Exception e) {
-                e.printStackTrace();
+            SoundEvent soundEvent = CustomSounds.getChannel(channelIndex);
+            String channelName = "narration_channel" + channelIndex;
+            String wavName = channelName + ".wav";
+            try (FileOutputStream fos = new FileOutputStream(wavName)) {
+              fos.write(audioBytes);
+              String oggName = channelName + ".ogg";
+              // delete previous item occupying channel if it exists
+              File oldChannelIntermediateContent = new File(oggName);
+              if (oldChannelIntermediateContent.exists()) {
+                oldChannelIntermediateContent.delete();
               }
-            });
+
+              ProcessBuilder pb = new ProcessBuilder(
+                  "ffmpeg", "-i", wavName, "-c:a", "libvorbis", oggName);
+              Process process = pb.start();
+              int exitCode = process.waitFor();
+              if (exitCode == 0) {
+                System.out.println("Conversion successful!");
+              } else {
+                System.err.println("Conversion failed with exit code: " + exitCode);
+              }
+
+              // remove old content and move new content to
+              // resources/assets/narrator-test/sounds/
+              final String assetLocation = "../build/resources/main/assets/narrator-test/sounds/";
+              File newChannelContent = new File(oggName);
+              File oldChannelContent = new File(assetLocation +
+                  oggName);
+              if (newChannelContent.exists()) {
+                System.out.println("Moving " + oggName + " to " + oldChannelContent.getAbsolutePath());
+                if (oldChannelContent.exists()) {
+                  System.out.println("Deleting old " + oggName);
+                  oldChannelContent.delete();
+                } else {
+                  System.out.println("Old " + oggName + " does not exist" + oldChannelContent.getAbsolutePath());
+                }
+                newChannelContent.renameTo(oldChannelContent);
+                // play the sound using minecraft's sound system
+                Random random = Random.create();
+                context.client().getSoundManager().play(
+                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 1.0F, 1.0F, random, position));
+
+              } else {
+                System.err.println("Move failed: " + oggName + " does not exist");
+              }
+
+            } catch (IOException e) {
+              e.printStackTrace();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
           }
         });
 
+    for (
 
-
-
-
-
-
-        for (int i=0; i<4; i++){
-            armorState.add("");
-        }
-
-        // Register client tick event
-        ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
-
-        // Register attack entity event
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            // Only process the event if it's not canceled and the player is not spectating
-            if (!world.isClient && player.isAttackable() && !player.isSpectator()) {
-                ActionResult result = EventCalls.onEntityDamage(player, world, hand, entity, hitResult);
-                return result;
-            }
-            return ActionResult.PASS;
-        });
-
-        // Register block interaction event (client-side)
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-            if (world.isClient && player instanceof ClientPlayerEntity) {
-                BlockPos interactedPos = hitResult.getBlockPos();
-                BlockState interactedState = world.getBlockState(interactedPos);
-                Block interactedBlock = interactedState.getBlock();
-
-                // Check if the block is interactable (e.g., chest, furnace)
-                if (isInteractableBlock(interactedBlock)) {
-                    if(System.currentTimeMillis() > nextAllowedBlockUse){
-                        // Log the block interaction
-                        NarratorTest.sendLogSuccessMessage("You interacted with a block: " + interactedBlock.getName().getString() + " at " + interactedPos.toShortString(), player);
-                        NarratorTest.eventLogger.appendEvent("Interact Block", interactedBlock.getName().getString(), System.currentTimeMillis());
-                        nextAllowedBlockUse = System.currentTimeMillis() + 150;
-                    } else NarratorTest.sendLogFailMessage("Remaining block interaction cooldown: " + Long.toString(nextAllowedBlockUse-System.currentTimeMillis()), player);
-                    } else {
-                    // Check if the player is placing a block
-                    ItemStack stack = player.getStackInHand(hand);
-                    if (stack.getItem() instanceof BlockItem) {
-                        if(System.currentTimeMillis() > nextAllowedBlockPlace){
-                            BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
-                            NarratorTest.sendLogSuccessMessage("You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString(), player);
-                            NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(), System.currentTimeMillis());
-                            nextAllowedBlockPlace = System.currentTimeMillis() + 190;
-                        } else NarratorTest.sendLogFailMessage("Remaining block place cooldown: " + Long.toString(nextAllowedBlockPlace-System.currentTimeMillis()), player);
-                        }
-                }
-            }
-            return ActionResult.PASS; // Allow the interaction to proceed
-        });
-
-
-        // Equip armor event
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            PlayerEntity player = MinecraftClient.getInstance().player;
-            if (player != null) {
-                int i = 0;
-                for (ItemStack stack : player.getArmorItems()) {
-                    if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
-                        armorState.set(i, stack.getName().getString());
-                        NarratorTest.sendLogSuccessMessage("You equipped: " + stack.getName().getString(), player);
-                        NarratorTest.eventLogger.appendEvent("Equip", stack.getName().getString(), System.currentTimeMillis());
-                        
-                    } else if (stack.isEmpty() && !armorState.get(i).isEmpty()){
-                        NarratorTest.sendLogSuccessMessage("You unequipped: " + armorState.get(i), player);
-                        NarratorTest.eventLogger.appendEvent("Unequip", armorState.get(i), System.currentTimeMillis());
-                        armorState.set(i, "");
-                    }
-                    i++;
-                }
-            }
-        });
-
-        // Breeding and taming animals, and trading with villagers event
-        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (entity instanceof AnimalEntity) {
-                AnimalEntity animal = (AnimalEntity) entity;
-                ItemStack heldItem = player.getStackInHand(hand);
-
-                if (animal.isBreedingItem(heldItem)) {
-                    if(System.currentTimeMillis() > nextAllowedBreed){
-                        NarratorTest.sendLogSuccessMessage("You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString(), player);
-                        NarratorTest.eventLogger.appendEvent("Bred", entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
-                        nextAllowedBreed = System.currentTimeMillis() + 300;
-                    } else NarratorTest.sendLogFailMessage("Remaining breed cooldown: " + Long.toString(nextAllowedBreed-System.currentTimeMillis()), player);
-                    
-                } else {
-                    NarratorTest.sendLogFailMessage("You tried to breed: " + entity.getName().getString() + " with an invalid item", player);
-                }
-            }
-            if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
-                if(System.currentTimeMillis() > nextAllowedTrade){
-                    NarratorTest.sendLogSuccessMessage("You traded with : " + entity.getName().getString(), player);
-                    NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
-                    nextAllowedTrade = System.currentTimeMillis() + 500;
-                } else NarratorTest.sendLogFailMessage("Remaining trade cooldown: " + Long.toString(nextAllowedTrade-System.currentTimeMillis()), player);
-                
-            }
-            return ActionResult.PASS;
-        });
+        int i = 0; i < 4; i++) {
+      armorState.add("");
     }
 
-    private static boolean isInteractableBlock(Block block) {
+    // Register client tick event
+    ClientTickEvents.END_CLIENT_TICK.register(EventCalls::onClientTick);
+
+    // Register attack entity event
+    AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+      // Only process the event if it's not canceled and the player is not spectating
+      if (!world.isClient && player.isAttackable() && !player.isSpectator()) {
+        ActionResult result = EventCalls.onEntityDamage(player, world, hand, entity, hitResult);
+        return result;
+      }
+      return ActionResult.PASS;
+    });
+
+    // Register block interaction event (client-side)
+    UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+      if (world.isClient && player instanceof ClientPlayerEntity) {
+        BlockPos interactedPos = hitResult.getBlockPos();
+        BlockState interactedState = world.getBlockState(interactedPos);
+        Block interactedBlock = interactedState.getBlock();
+
+        // Check if the block is interactable (e.g., chest, furnace)
+        if (isInteractableBlock(interactedBlock)) {
+          if (System.currentTimeMillis() > nextAllowedBlockUse) {
+            // Log the block interaction
+            NarratorTest.sendLogSuccessMessage("You interacted with a block: " + interactedBlock.getName().getString()
+                + " at " + interactedPos.toShortString(), player);
+            NarratorTest.eventLogger.appendEvent("Interact Block", interactedBlock.getName().getString(),
+                System.currentTimeMillis());
+            nextAllowedBlockUse = System.currentTimeMillis() + 150;
+          } else
+            NarratorTest.sendLogFailMessage("Remaining block interaction cooldown: "
+                + Long.toString(nextAllowedBlockUse - System.currentTimeMillis()), player);
+        } else {
+          // Check if the player is placing a block
+          ItemStack stack = player.getStackInHand(hand);
+          if (stack.getItem() instanceof BlockItem) {
+            if (System.currentTimeMillis() > nextAllowedBlockPlace) {
+              BlockPos placementPos = hitResult.getBlockPos().offset(hitResult.getSide());
+              NarratorTest.sendLogSuccessMessage(
+                  "You placed a block: " + stack.getName().getString() + " at " + placementPos.toShortString(), player);
+              NarratorTest.eventLogger.appendEvent("Place Block", stack.getName().getString(),
+                  System.currentTimeMillis());
+              nextAllowedBlockPlace = System.currentTimeMillis() + 190;
+            } else
+              NarratorTest.sendLogFailMessage("Remaining block place cooldown: "
+                  + Long.toString(nextAllowedBlockPlace - System.currentTimeMillis()), player);
+          }
+        }
+      }
+      return ActionResult.PASS; // Allow the interaction to proceed
+    });
+
+    // Equip armor event
+    ClientTickEvents.END_CLIENT_TICK.register(client -> {
+      PlayerEntity player = MinecraftClient.getInstance().player;
+      if (player != null) {
+        int i = 0;
+        for (ItemStack stack : player.getArmorItems()) {
+          if (!stack.isEmpty() && armorState.get(i).isEmpty()) {
+            armorState.set(i, stack.getName().getString());
+            NarratorTest.sendLogSuccessMessage("You equipped: " + stack.getName().getString(), player);
+            NarratorTest.eventLogger.appendEvent("Equip", stack.getName().getString(), System.currentTimeMillis());
+
+          } else if (stack.isEmpty() && !armorState.get(i).isEmpty()) {
+            NarratorTest.sendLogSuccessMessage("You unequipped: " + armorState.get(i), player);
+            NarratorTest.eventLogger.appendEvent("Unequip", armorState.get(i), System.currentTimeMillis());
+            armorState.set(i, "");
+          }
+          i++;
+        }
+      }
+    });
+
+    // Breeding and taming animals, and trading with villagers event
+    UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+      if (entity instanceof AnimalEntity) {
+        AnimalEntity animal = (AnimalEntity) entity;
+        ItemStack heldItem = player.getStackInHand(hand);
+
+        if (animal.isBreedingItem(heldItem)) {
+          if (System.currentTimeMillis() > nextAllowedBreed) {
+            NarratorTest.sendLogSuccessMessage(
+                "You bred: " + entity.getName().getString() + " using " + heldItem.getName().getString(), player);
+            NarratorTest.eventLogger.appendEvent("Bred",
+                entity.getName().getString() + " using " + heldItem.getName().getString(), System.currentTimeMillis());
+            nextAllowedBreed = System.currentTimeMillis() + 300;
+          } else
+            NarratorTest.sendLogFailMessage(
+                "Remaining breed cooldown: " + Long.toString(nextAllowedBreed - System.currentTimeMillis()), player);
+
+        } else {
+          NarratorTest.sendLogFailMessage(
+              "You tried to breed: " + entity.getName().getString() + " with an invalid item", player);
+        }
+      }
+      if (entity instanceof net.minecraft.entity.passive.VillagerEntity) {
+        if (System.currentTimeMillis() > nextAllowedTrade) {
+          NarratorTest.sendLogSuccessMessage("You traded with : " + entity.getName().getString(), player);
+          NarratorTest.eventLogger.appendEvent("Traded with", entity.getName().getString(), System.currentTimeMillis());
+          nextAllowedTrade = System.currentTimeMillis() + 500;
+        } else
+          NarratorTest.sendLogFailMessage(
+              "Remaining trade cooldown: " + Long.toString(nextAllowedTrade - System.currentTimeMillis()), player);
+
+      }
+      return ActionResult.PASS;
+    });
+  }
+
+  private static boolean isInteractableBlock(Block block) {
     // List of interactable blocks
     return block instanceof ChestBlock || // Chests
-           block instanceof FurnaceBlock || // Furnaces
-           block instanceof CraftingTableBlock || // Crafting tables
-           block instanceof AnvilBlock || // Anvils
-           block instanceof EnchantingTableBlock || // Enchanting tables
-           block instanceof EnderChestBlock || // Ender chests
-           block instanceof ShulkerBoxBlock || // Shulker boxes
-           block instanceof BarrelBlock || // Barrels
-           block instanceof DispenserBlock || // Dispensers
-           block instanceof DropperBlock || // Droppers
-           block instanceof HopperBlock || // Hoppers
-           block instanceof BrewingStandBlock || // Brewing stands
-           block instanceof BeaconBlock || // Beacons
-           block instanceof ComparatorBlock || // Redstone comparators
-           block instanceof RepeaterBlock || // Redstone repeaters
-           block instanceof LeverBlock || // Levers
-           block instanceof ButtonBlock || // Buttons
-           block instanceof DoorBlock || // Doors
-           block instanceof TrapdoorBlock || // Trapdoors
-           block instanceof FenceGateBlock || // Fence gates
-           block instanceof NoteBlock || // Note blocks
-           block instanceof JukeboxBlock || // Jukeboxes
-           block instanceof LecternBlock || // Lecterns
-           block instanceof LoomBlock || // Looms
-           block instanceof StonecutterBlock || // Stonecutters
-           block instanceof SmithingTableBlock || // Smithing tables
-           block instanceof CartographyTableBlock || // Cartography tables
-           block instanceof GrindstoneBlock || // Grindstones
-           block instanceof BellBlock || // Bells
-           block instanceof CampfireBlock || // Campfires
-           block instanceof RespawnAnchorBlock || // Respawn anchors
-           block instanceof CommandBlock || // Command blocks
-           block instanceof StructureBlock || // Structure blocks
-           block instanceof JigsawBlock || // Jigsaw blocks
-           block instanceof AbstractSignBlock || // Signs
-           block instanceof AbstractBannerBlock; // Banners
-    }
+        block instanceof FurnaceBlock || // Furnaces
+        block instanceof CraftingTableBlock || // Crafting tables
+        block instanceof AnvilBlock || // Anvils
+        block instanceof EnchantingTableBlock || // Enchanting tables
+        block instanceof EnderChestBlock || // Ender chests
+        block instanceof ShulkerBoxBlock || // Shulker boxes
+        block instanceof BarrelBlock || // Barrels
+        block instanceof DispenserBlock || // Dispensers
+        block instanceof DropperBlock || // Droppers
+        block instanceof HopperBlock || // Hoppers
+        block instanceof BrewingStandBlock || // Brewing stands
+        block instanceof BeaconBlock || // Beacons
+        block instanceof ComparatorBlock || // Redstone comparators
+        block instanceof RepeaterBlock || // Redstone repeaters
+        block instanceof LeverBlock || // Levers
+        block instanceof ButtonBlock || // Buttons
+        block instanceof DoorBlock || // Doors
+        block instanceof TrapdoorBlock || // Trapdoors
+        block instanceof FenceGateBlock || // Fence gates
+        block instanceof NoteBlock || // Note blocks
+        block instanceof JukeboxBlock || // Jukeboxes
+        block instanceof LecternBlock || // Lecterns
+        block instanceof LoomBlock || // Looms
+        block instanceof StonecutterBlock || // Stonecutters
+        block instanceof SmithingTableBlock || // Smithing tables
+        block instanceof CartographyTableBlock || // Cartography tables
+        block instanceof GrindstoneBlock || // Grindstones
+        block instanceof BellBlock || // Bells
+        block instanceof CampfireBlock || // Campfires
+        block instanceof RespawnAnchorBlock || // Respawn anchors
+        block instanceof CommandBlock || // Command blocks
+        block instanceof StructureBlock || // Structure blocks
+        block instanceof JigsawBlock || // Jigsaw blocks
+        block instanceof AbstractSignBlock || // Signs
+        block instanceof AbstractBannerBlock; // Banners
+  }
 }
