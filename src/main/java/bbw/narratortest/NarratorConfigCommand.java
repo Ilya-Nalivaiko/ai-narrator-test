@@ -68,6 +68,15 @@ public class NarratorConfigCommand {
                     })
                 )
             )
+            .then(CommandManager.literal("echo")
+                .then(CommandManager.argument("value", StringArgumentType.greedyString())
+                    .executes(ctx -> {
+                        String prompt = StringArgumentType.getString(ctx, "value");
+                        TTSGenerator.speak(prompt, ctx.getSource().getPlayer(), ctx.getSource().getWorld());
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
+            )
         );
     }
 }
