@@ -25,9 +25,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+
+import com.mojang.authlib.properties.Property;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-
 
 public class TTSGenerator {
   private TTSGenerator() {
@@ -41,20 +43,25 @@ public class TTSGenerator {
   }
 
   public static void speak(String text, PlayerEntity player, World world) {
+    if (world.isClient) {
+      System.out.println("Cannot generate TTS audio on client side.");
+      return;
+    }
+    
+    // Pass whichever head item you want
+    ItemStack head = new ItemStack(Items.PLAYER_HEAD);
+    GameProfile targetProfile = player.getGameProfile();
 
-    if (!world.isClient) {
-      // Pass whichever head item you want
-      ItemStack head = new ItemStack(Items.PLAYER_HEAD);
-      GameProfile targetProfile = player.getGameProfile();
-      head.set(DataComponentTypes.PROFILE, new ProfileComponent(targetProfile));
-      ArmorStandEntity armorStand = spawnNarratorArmorStand(player, world, head);
+    Property textureProperty = new Property("textures",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDBmMjU5ZDJhNTkxMTVlNjJiYjllOWY4NmNlZTg4OTA5YmVkMDI5NGMzYTA4ZGJiNWRmMzlmMmYyNjJkMDhhNSJ9fX0=");
+    targetProfile.getProperties().put("textures", textureProperty);
+    head.set(DataComponentTypes.PROFILE, new ProfileComponent(targetProfile));
+    ArmorStandEntity armorStand = spawnNarratorArmorStand(player, world, head);
 
-      // Optionally despawn it after 5 seconds
-      if (armorStand != null) {
-          despawnNarratorArmorStand(armorStand, 20);
-      }
-  }
-
+    // Optionally despawn it after 5 seconds
+    if (armorStand != null) {
+      despawnNarratorArmorStand(armorStand, 20);
+    }
 
     // ✅ Text-to-Speech Processing
     VoiceManager voiceManager = VoiceManager.getInstance();
@@ -102,24 +109,25 @@ public class TTSGenerator {
     }
 
   }
-  
- private static ArmorStandEntity spawnNarratorArmorStand(PlayerEntity player, World world, ItemStack headItemStack) {
-    if (!(player instanceof ServerPlayerEntity)) return null;
+
+  private static ArmorStandEntity spawnNarratorArmorStand(PlayerEntity player, World world, ItemStack headItemStack) {
+    if (!(player instanceof ServerPlayerEntity))
+      return null;
 
     Vec3d playerPos = player.getPos();
     ArmorStandEntity armorStand = new ArmorStandEntity(EntityType.ARMOR_STAND, world);
     // Spawn 1.5 blocks above the player to avoid ground collision.
     armorStand.refreshPositionAndAngles(playerPos.x, playerPos.y + 0.5, playerPos.z, 0, 0);
-    armorStand.setCustomName(player.getName());
+    armorStand.setCustomName(Text.literal("Backseat"));
     armorStand.setCustomNameVisible(true);
     armorStand.setInvisible(true); // Change to true if you want it invisible
-    armorStand.setNoGravity(true);    // Let it float
+    armorStand.setNoGravity(true); // Let it float
 
     // Equip the Armor Stand with the chosen head (or default to Creeper Head)
     if (headItemStack != null) {
-        armorStand.equipStack(EquipmentSlot.HEAD, headItemStack);
+      armorStand.equipStack(EquipmentSlot.HEAD, headItemStack);
     } else {
-        armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.CREEPER_HEAD));
+      armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.CREEPER_HEAD));
     }
 
     world.spawnEntity(armorStand);
@@ -127,51 +135,49 @@ public class TTSGenerator {
 
     // Register a Fabric tick event to update the armor stand each server tick.
     ServerTickEvents.START_SERVER_TICK.register(server -> {
-        // If the armor stand is removed or the player is dead, skip updates.
-        if (armorStand.isRemoved() || !player.isAlive()) {
-            // Note: Fabric's tick events don't support easy unregistration,
-            // so this callback will simply do nothing once these conditions are met.
-            return;
-        }
+      // If the armor stand is removed or the player is dead, skip updates.
+      if (armorStand.isRemoved() || !player.isAlive()) {
+        // Note: Fabric's tick events don't support easy unregistration,
+        // so this callback will simply do nothing once these conditions are met.
+        return;
+      }
 
-        // Make the armor stand spin by increasing its yaw.
-        float currentYaw = armorStand.getYaw();
-        armorStand.setYaw(currentYaw + 5.0f); // Adjust spin speed as desired
+      // Make the armor stand spin by increasing its yaw.
+      float currentYaw = armorStand.getYaw();
+      armorStand.setYaw(currentYaw + 5.0f); // Adjust spin speed as desired
 
-        // Have the armor stand follow the player.
-        Vec3d targetPos = player.getPos().add(0, 1, 0); // Target position above the player.
-        Vec3d currentPos = armorStand.getPos();
-        Vec3d diff = targetPos.subtract(currentPos);
-        double distance = diff.length();
-        
-        // If the armor stand is too far from the target, move it closer.
-        if (distance > 2.0) {
-            Vec3d movement = diff.normalize().multiply(0.1); // Adjust movement speed as needed
-            armorStand.setPosition(
-                currentPos.x + movement.x,
-                currentPos.y + movement.y,
-                currentPos.z + movement.z
-            );
-        }
+      // Have the armor stand follow the player.
+      Vec3d targetPos = player.getPos().add(0, 1, 0); // Target position above the player.
+      Vec3d currentPos = armorStand.getPos();
+      Vec3d diff = targetPos.subtract(currentPos);
+      double distance = diff.length();
+
+      // If the armor stand is too far from the target, move it closer.
+      if (distance > 2.0) {
+        Vec3d movement = diff.normalize().multiply(0.1); // Adjust movement speed as needed
+        armorStand.setPosition(
+            currentPos.x + movement.x,
+            currentPos.y + movement.y,
+            currentPos.z + movement.z);
+      }
     });
 
     return armorStand;
-}
+  }
 
-
-  
   private static void despawnNarratorArmorStand(ArmorStandEntity armorStand, int delaySeconds) {
-      if (armorStand == null || armorStand.isRemoved()) return;
-  
-      // Run only on server side
-      if (!armorStand.getEntityWorld().isClient()) {
-          CompletableFuture.delayedExecutor(delaySeconds, TimeUnit.SECONDS).execute(() -> {
-              if (!armorStand.isRemoved()) {
-                  armorStand.discard(); // Properly removes the entity
-                  System.out.println("❌ Despawned Armor Stand: " + armorStand.getCustomName());
-              }
-          });
-      }
+    if (armorStand == null || armorStand.isRemoved())
+      return;
+
+    // Run only on server side
+    if (!armorStand.getEntityWorld().isClient()) {
+      CompletableFuture.delayedExecutor(delaySeconds, TimeUnit.SECONDS).execute(() -> {
+        if (!armorStand.isRemoved()) {
+          armorStand.discard(); // Properly removes the entity
+          System.out.println("❌ Despawned Armor Stand: " + armorStand.getCustomName());
+        }
+      });
+    }
   }
 
 }
