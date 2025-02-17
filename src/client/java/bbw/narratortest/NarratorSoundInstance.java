@@ -18,7 +18,7 @@ public class NarratorSoundInstance extends MovingSoundInstance {
 		// set up default values when the sound is about to start
 		this.volume = 1.0f;
 		this.pitch = 1.0f;
-		this.repeat = true;
+		this.repeat = false;
 		this.setPositionToEntity();
 	}
 
