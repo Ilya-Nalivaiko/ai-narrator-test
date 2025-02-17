@@ -110,7 +110,7 @@ public class TTSGenerator {
     ArmorStandEntity armorStand = new ArmorStandEntity(EntityType.ARMOR_STAND, world);
     // Spawn 1.5 blocks above the player to avoid ground collision.
     armorStand.refreshPositionAndAngles(playerPos.x, playerPos.y + 0.5, playerPos.z, 0, 0);
-    armorStand.setCustomName(player.getName());
+    armorStand.setCustomName("BackSeat");
     armorStand.setCustomNameVisible(true);
     armorStand.setInvisible(true); // Change to true if you want it invisible
     armorStand.setNoGravity(true);    // Let it float
