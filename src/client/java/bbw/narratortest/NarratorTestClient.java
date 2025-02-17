@@ -142,7 +142,7 @@ public class NarratorTestClient implements ClientModInitializer {
                 // play the sound using minecraft's sound system
                 Random random = Random.create();
                 context.client().getSoundManager().play(
-                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 1.0F, 1.0F, random, position));
+                    new PositionedSoundInstance(soundEvent, SoundCategory.NEUTRAL, 2.0F, 1.0F, random, position));
 
               } else {
                 System.err.println("Move failed: " + oggName + " does not exist");
