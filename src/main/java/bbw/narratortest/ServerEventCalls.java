@@ -1,25 +1,25 @@
 package bbw.narratortest;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.Structure;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
 public class ServerEventCalls {
     // Map to store the last biome of each player
     private static final Map<ServerPlayerEntity, RegistryKey<Biome>> playerBiomeMap = new HashMap<>();

@@ -7,28 +7,16 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-
-import bbw.narratortest.config.ModConfig;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
-import org.json.JSONObject;
-import okhttp3.*;
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.concurrent.TimeUnit;
-
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
+
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 public class TTSGenerator {
   private TTSGenerator() {
@@ -42,6 +30,12 @@ public class TTSGenerator {
   }
 
   public static void speak(String text, PlayerEntity player, World world) {
+
+    if (!world.isClient) { // ✅ Make sure this runs only on the server
+      spawnNarratorArmorStand(player, world);
+    }
+
+
     // ✅ Text-to-Speech Processing
     VoiceManager voiceManager = VoiceManager.getInstance();
     Voice voice = voiceManager.getVoice("kevin16");
@@ -88,4 +82,22 @@ public class TTSGenerator {
     }
 
   }
+private static void spawnNarratorArmorStand(PlayerEntity player, World world) {
+    if (!(player instanceof ServerPlayerEntity)) {
+      return; // ✅ Prevent running on the client
+    }
+    
+    Vec3d playerPos = player.getPos(); // Get player's position
+    ArmorStandEntity armorStand = new ArmorStandEntity(EntityType.ARMOR_STAND, world);
+    armorStand.refreshPositionAndAngles(playerPos.getX(), playerPos.getY(), playerPos.getZ(), 0, 0);
+    armorStand.setCustomName(player.getName()); // Name it after the player
+    armorStand.setCustomNameVisible(true);
+    armorStand.setInvisible(false); // Set to `true` if you want it invisible
+    armorStand.setNoGravity(true); // Makes it float in place
+
+    world.spawnEntity(armorStand); // ✅ Spawns the Armor Stand in the world
+    System.out.println("✅ Spawned Armor Stand for " + player.getName().getString());
+  }
+
+
 }
