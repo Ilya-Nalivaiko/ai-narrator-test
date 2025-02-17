@@ -1,24 +1,10 @@
 package bbw.narratortest;
 
 import bbw.narratortest.config.ModConfig;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import org.json.JSONObject;
 import okhttp3.*;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
-
-import com.sun.speech.freetts.Voice;
-import com.sun.speech.freetts.VoiceManager;
 
 public class ChatGPTTest {
     private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
