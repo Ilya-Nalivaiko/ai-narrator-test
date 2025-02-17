@@ -7,10 +7,13 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
+import com.mojang.authlib.GameProfile;
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,7 +45,10 @@ public class TTSGenerator {
 
     if (!world.isClient) {
       // Pass whichever head item you want
-      ArmorStandEntity armorStand = spawnNarratorArmorStand(player, world, Items.CREEPER_HEAD);
+      ItemStack head = new ItemStack(Items.PLAYER_HEAD);
+      GameProfile targetProfile = player.getGameProfile();
+      head.set(DataComponentTypes.PROFILE, new ProfileComponent(targetProfile));
+      ArmorStandEntity armorStand = spawnNarratorArmorStand(player, world, head);
 
       // Optionally despawn it after 5 seconds
       if (armorStand != null) {
@@ -98,7 +104,7 @@ public class TTSGenerator {
 
   }
   
-  private static ArmorStandEntity spawnNarratorArmorStand(PlayerEntity player, World world, Item headItem) {
+  private static ArmorStandEntity spawnNarratorArmorStand(PlayerEntity player, World world, ItemStack headItem) {
     if (!(player instanceof ServerPlayerEntity)) return null;
 
     Vec3d playerPos = player.getPos();
@@ -106,12 +112,13 @@ public class TTSGenerator {
     armorStand.refreshPositionAndAngles(playerPos.x, playerPos.y, playerPos.z, 0, 0);
     armorStand.setCustomName(player.getName());
     armorStand.setCustomNameVisible(true);
-    armorStand.setInvisible(false); // Set to `true` if you want it invisible
+    armorStand.setInvisible(true); // Set to `true` if you want it invisible
     armorStand.setNoGravity(true); // Makes it float in place
+    armorStand.setInvulnerable(true);
 
     // Equip the Armor Stand with the chosen mob head, e.g. Items.ZOMBIE_HEAD or Items.SKELETON_SKULL
     if (headItem != null) {
-        armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(headItem));
+        armorStand.equipStack(EquipmentSlot.HEAD, headItem);
     } else {
         // Fallback if headItem was null
         armorStand.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.CREEPER_HEAD));
