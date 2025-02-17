@@ -11,13 +11,7 @@ base {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
 	mavenCentral()
-
 }
 
 loom {
@@ -29,27 +23,32 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
-
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
+	// Minecraft and Fabric dependencies
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    
-	// FreeTTS dependency
-	implementation 'net.sf.sociaal:freetts:1.2.2'
 
-	
-	// Needed for communication with chat gpt
-	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
-    implementation 'org.json:json:20210307'
-	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+	// FreeTTS dependency (bundled with the mod)
+	implementation include('net.sf.sociaal:freetts:1.2.2')
 
+	// OkHttp dependency (bundled with the mod)
+	implementation include('com.squareup.okhttp3:okhttp:4.9.3')
+
+	// Okio dependency (required for OkHttp)
+	implementation include('com.squareup.okio:okio:3.2.0')
+
+	// Kotlin standard library (required for OkHttp 4.x)
+	implementation include('org.jetbrains.kotlin:kotlin-stdlib:1.8.22')
+
+	// JSON dependency (bundled with the mod)
+	implementation include('org.json:json:20210307')
+
+	// java-dotenv dependency (bundled with the mod)
+	implementation include('io.github.cdimascio:java-dotenv:5.2.2')
 }
 
 processResources {
@@ -65,11 +64,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
 	withSourcesJar()
-
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
 }
@@ -80,21 +75,11 @@ jar {
 	}
 }
 
-// configure the maven publication
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
 			artifactId = project.archives_base_name
 			from components.java
 		}
-	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-		
 	}
 }

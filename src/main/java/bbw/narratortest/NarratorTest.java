@@ -1,5 +1,8 @@
 package bbw.narratortest;
 
+import net.minecraft.registry.Registries;
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +14,6 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,7 +23,7 @@ import net.minecraft.text.Text;
 
 
 public class NarratorTest implements ModInitializer {
-	public static EventLogger eventLogger = new EventLogger();
+	private static HashMap<String, EventLogger> eventLoggerMap = new HashMap<>();
 
     public static final String MOD_ID = "narrator-test";
 
@@ -29,6 +31,34 @@ public class NarratorTest implements ModInitializer {
 
     // Logger for console and log file
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static void addEvent(PlayerEntity player, String type, String extra, long time){
+		EventLogger logger = eventLoggerMap.get(player.getUuidAsString());
+		if (logger == null){
+			logger = new EventLogger();
+			eventLoggerMap.put(player.getUuidAsString(), logger);
+		}
+		logger.appendEvent(type, extra, time);
+		if (type == "Died" || type == "Advancment Made"){
+			AutoFeedbackRunner.runDefinitely(player, player.getWorld());
+		} else {
+			AutoFeedbackRunner.runMaybe(player, player.getWorld());
+		}
+		
+	}
+
+	public static EventLogger getLogger(PlayerEntity player){
+		EventLogger logger = eventLoggerMap.get(player.getUuidAsString());
+		if (logger == null){
+			logger = new EventLogger();
+			eventLoggerMap.put(player.getUuidAsString(), logger);
+		}
+		return logger;
+	}
+
+	public static void clearLoggers(){
+		eventLoggerMap = new HashMap<>();
+	}
 
 	@Override
 	public void onInitialize() {
@@ -48,6 +78,8 @@ public class NarratorTest implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             DebugCommand.register(dispatcher);
         });
+
+		
         
         // Register entity death event
         ServerLivingEntityEvents.AFTER_DEATH.register((LivingEntity entity, DamageSource damageSource) -> {
@@ -63,7 +95,7 @@ public class NarratorTest implements ModInitializer {
 
         // Register block break event
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-            ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, state.getBlock().getName().getString());
+            ServerEventCalls.onBlockBreak((ServerPlayerEntity) player, pos, Registries.BLOCK.getEntry(state.getBlock()).getIdAsString());
         });
 
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -122,8 +154,8 @@ public class NarratorTest implements ModInitializer {
         if (ModConfig.getConfig().debugLevel == 2){
             player.sendMessage(Text.literal("[LOGGED] " + message), false);
         }
-        if (ModConfig.getConfig().debugLevel >= 1){
-            LOGGER.debug(message);
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
         }
     }
 
@@ -131,8 +163,17 @@ public class NarratorTest implements ModInitializer {
         if (ModConfig.getConfig().debugLevel == 2){
             player.sendMessage(Text.literal("[NOT LOGGED] " + message), false);
         }
-        if (ModConfig.getConfig().debugLevel >= 1){
-            LOGGER.debug(message);
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
+        }
+    }
+
+	public static void sendRequestInfoMessage(String message, PlayerEntity player){
+        if (ModConfig.getConfig().debugLevel == 2){
+            player.sendMessage(Text.literal("[REQUEST] " + message), false);
+        }
+        if (ModConfig.getConfig().debugLevel == 1){
+            LOGGER.info(message);
         }
     }
 

@@ -30,7 +30,7 @@ public class AdvancementDetectionHandler implements ServerMessageEvents.GameMess
             ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerName);
 
             NarratorTest.sendLogSuccessMessage("You earned the advancement: " + advancementName, player);
-            NarratorTest.eventLogger.appendEvent("Advancment Made", advancementName, System.currentTimeMillis());
+            NarratorTest.getLogger(player).appendEvent("Advancment Made", advancementName, System.currentTimeMillis());
         }
     }
 }
