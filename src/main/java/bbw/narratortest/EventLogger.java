@@ -13,10 +13,6 @@ public class EventLogger {
         events = new ArrayList<>();
     }
 
-    public int getNumEvents(){
-        return events.size();
-    }
-
     // Function to append a new event to the list
     public void appendEvent(String type, String extra, long timestamp) {
         events.add(new Event(type, extra, timestamp));
@@ -40,7 +36,7 @@ public class EventLogger {
 
         // Build the result string
         StringBuilder result = new StringBuilder();
-        result.append("Recently, the player performed a lot of actions:");
+        result.append("Recently, the player performed the following actions:");
         for (Map.Entry<String, Map<String, Integer>> typeEntry : eventMap.entrySet()) {
             String type = typeEntry.getKey();
             Map<String, Integer> extraMap = typeEntry.getValue();

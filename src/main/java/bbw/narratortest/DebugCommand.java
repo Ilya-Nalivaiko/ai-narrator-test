@@ -39,7 +39,7 @@ public class DebugCommand {
 
         if (player != null) {
             // Do something with the player
-            GTPInterface.getGPTFeedback(NarratorTest.getLogger(player).collapseEvents(), player, world);
+            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.collapseEvents(), player, world);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
@@ -56,7 +56,7 @@ public class DebugCommand {
 
         if (player != null) {
             // Do something with the player
-            GTPInterface.getGPTFeedback(NarratorTest.getLogger(player).dontCollapseEvents(), player, world);
+            GTPInterface.getGPTFeedback(NarratorTest.eventLogger.dontCollapseEvents(), player, world);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
@@ -72,7 +72,7 @@ public class DebugCommand {
 
         if (player != null) {
             // Do something with the player
-            NarratorTest.getLogger(player).clear();
+            NarratorTest.eventLogger.clear();
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
@@ -88,7 +88,7 @@ public class DebugCommand {
 
         if (player != null) {
             // Do something with the player
-            context.getSource().sendFeedback(() -> Text.of(NarratorTest.getLogger(player).dontCollapseEvents()), false);
+            context.getSource().sendFeedback(() -> Text.of(NarratorTest.eventLogger.dontCollapseEvents()), false);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));
@@ -104,7 +104,7 @@ public class DebugCommand {
 
         if (player != null) {
             // Do something with the player
-            context.getSource().sendFeedback(() -> Text.of(NarratorTest.getLogger(player).collapseEvents()), false);
+            context.getSource().sendFeedback(() -> Text.of(NarratorTest.eventLogger.collapseEvents()), false);
         } else {
             // Handle the case where the command was not executed by a player (e.g., from console)
             context.getSource().sendError(Text.of("This command can only be executed by a player."));

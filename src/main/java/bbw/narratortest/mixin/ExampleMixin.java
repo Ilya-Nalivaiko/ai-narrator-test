@@ -15,8 +15,7 @@ public class ExampleMixin {
 		// This code is injected into the start of MinecraftServer.loadWorld()V
 
         NarratorTest.startTime = System.currentTimeMillis();
-		
-		NarratorTest.clearLoggers();
+		NarratorTest.eventLogger.clear();
 		
 	}
 }

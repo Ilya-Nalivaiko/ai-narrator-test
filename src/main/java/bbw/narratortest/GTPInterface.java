@@ -1,14 +1,12 @@
 package bbw.narratortest;
 
 import java.util.concurrent.CompletableFuture;
-
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 
 public class GTPInterface {
-    public static void getGPTFeedback(String prompt, PlayerEntity player, World world){
-        AutoFeedbackRunner.request_in_progress = true;
+    public static void getGPTFeedback(String prompt, ServerPlayerEntity player, World world){
         // Print to console for debugging
         System.out.println("[DEBUG] Sending request to ChatGPT: " + prompt);
         
@@ -28,11 +26,9 @@ public class GTPInterface {
                 player.sendMessage(Text.literal(narration), false);
 
                 TTSGenerator.speak(narration, player, world);
-                AutoFeedbackRunner.request_in_progress = false;
             }
         }).exceptionally(ex -> {
             System.out.println("[ERROR] Error in GPT request: " + ex.getMessage());
-            AutoFeedbackRunner.request_in_progress = false;
             ex.printStackTrace();
             return null;
         });
