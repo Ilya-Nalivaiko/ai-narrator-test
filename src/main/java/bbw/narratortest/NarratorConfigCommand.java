@@ -13,50 +13,60 @@ import net.minecraft.text.Text;
 public class NarratorConfigCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("narratorconfig")
-            .then(CommandManager.argument("temperature", FloatArgumentType.floatArg(0.0f, 1.0f))
-                .executes(ctx -> {
-                    float temp = FloatArgumentType.getFloat(ctx, "temperature");
-                    ModConfig.getConfig().temperature = temp;
-                    ModConfig.saveConfig(); // ✅ Save after change
-                    ctx.getSource().sendFeedback(() -> Text.literal("Narrator temperature set to: " + temp), false);
-                    return Command.SINGLE_SUCCESS;
-                })
+            .then(CommandManager.literal("temperature")
+                .then(CommandManager.argument("value", FloatArgumentType.floatArg(0.0f, 1.0f))
+                    .executes(ctx -> {
+                        float temp = FloatArgumentType.getFloat(ctx, "value");
+                        ModConfig.getConfig().temperature = temp;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Narrator temperature set to: " + temp), false);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
             )
-            .then(CommandManager.argument("cooldown", IntegerArgumentType.integer(1, 3600))
-                .executes(ctx -> {
-                    int cooldown = IntegerArgumentType.getInteger(ctx, "cooldown");
-                    ModConfig.getConfig().narratorCooldown = cooldown;
-                    ModConfig.saveConfig(); // ✅ Save after change
-                    ctx.getSource().sendFeedback(() -> Text.literal("Narrator cooldown set to: " + cooldown), false);
-                    return Command.SINGLE_SUCCESS;
-                })
+            .then(CommandManager.literal("cooldown")
+                .then(CommandManager.argument("value", IntegerArgumentType.integer(1, 3600))
+                    .executes(ctx -> {
+                        int cooldown = IntegerArgumentType.getInteger(ctx, "value");
+                        ModConfig.getConfig().narratorCooldown = cooldown;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Narrator cooldown set to: " + cooldown), false);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
             )
-            .then(CommandManager.argument("maxevents", IntegerArgumentType.integer(1, 3600))
-                .executes(ctx -> {
-                    int maxevents = IntegerArgumentType.getInteger(ctx, "maxevents");
-                    ModConfig.getConfig().maxEvents = maxevents;
-                    ModConfig.saveConfig(); // ✅ Save after change
-                    ctx.getSource().sendFeedback(() -> Text.literal("Narrator max events set to: " + maxevents), false);
-                    return Command.SINGLE_SUCCESS;
-                })
+            .then(CommandManager.literal("maxevents")
+                .then(CommandManager.argument("value", IntegerArgumentType.integer(1, 3600))
+                    .executes(ctx -> {
+                        int maxevents = IntegerArgumentType.getInteger(ctx, "value");
+                        ModConfig.getConfig().maxEvents = maxevents;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Narrator max events set to: " + maxevents), false);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
             )
-            .then(CommandManager.argument("debugLevel", IntegerArgumentType.integer(0, 2))
-                .executes(ctx -> {
-                    int level = IntegerArgumentType.getInteger(ctx, "debugLevel");
-                    ModConfig.getConfig().debugLevel = level;
-                    ModConfig.saveConfig(); // ✅ Save after change
-                    ctx.getSource().sendFeedback(() -> Text.literal("Debug level set to: " + level), false);
-                    return Command.SINGLE_SUCCESS;
-                })
+            .then(CommandManager.literal("debugLevel")
+                .then(CommandManager.argument("value", IntegerArgumentType.integer(0, 2))
+                    .executes(ctx -> {
+                        int level = IntegerArgumentType.getInteger(ctx, "value");
+                        ModConfig.getConfig().debugLevel = level;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Debug level set to: " + level), false);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
             )
-            .then(CommandManager.argument("prompt", StringArgumentType.string())
-                .executes(ctx -> {
-                    String prompt = StringArgumentType.getString(ctx, "prompt");
-                    ModConfig.getConfig().systemPrompt = prompt;
-                    ModConfig.saveConfig(); // ✅ Save after change
-                    ctx.getSource().sendFeedback(() -> Text.literal("Narrator prompt updated!"), false);
-                    return Command.SINGLE_SUCCESS;
-                })
+            .then(CommandManager.literal("prompt")
+                .then(CommandManager.argument("value", StringArgumentType.greedyString())
+                    .executes(ctx -> {
+                        String prompt = StringArgumentType.getString(ctx, "value");
+                        ModConfig.getConfig().systemPrompt = prompt;
+                        ModConfig.saveConfig(); // ✅ Save after change
+                        ctx.getSource().sendFeedback(() -> Text.literal("Narrator prompt updated!"), false);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
             )
         );
     }
