@@ -1,7 +1,6 @@
 package bbw.narratortest;
 
 import java.io.ByteArrayInputStream;
-import java.rmi.registry.Registry;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
