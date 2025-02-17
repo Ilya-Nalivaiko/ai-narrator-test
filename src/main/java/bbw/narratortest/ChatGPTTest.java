@@ -1,24 +1,10 @@
 package bbw.narratortest;
 
 import bbw.narratortest.config.ModConfig;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import org.json.JSONObject;
 import okhttp3.*;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
-
-import com.sun.speech.freetts.Voice;
-import com.sun.speech.freetts.VoiceManager;
 
 public class ChatGPTTest {
     private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
@@ -45,6 +31,8 @@ public class ChatGPTTest {
         // ✅ Read values from config
         double temperature = ModConfig.getConfig().temperature;
         String systemPrompt = ModConfig.getConfig().systemPrompt;
+
+        systemPrompt += " IMPORTANT: keep it to a few sentences max. Pick and choose what is really important to comment on: maybe you don't need to include every action given and their quantities or timestamps (unless its important context)";
 
         JSONObject json = new JSONObject();
         json.put("model", "gpt-4");
