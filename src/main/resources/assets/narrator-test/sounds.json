@@ -1,8 +1,37 @@
 {
-  "steel_pipe_crash": {
+  "narration_channel0": {
     "sounds": [
-      "narrator-test:steel_pipe_crash"
+      "narrator-test:narration_channel0"
+    ]
+  },
+  "narration_channel1": {
+    "sounds": [
+      "narrator-test:narration_channel1"
+    ]
+  },
+  "narration_channel2": {
+    "sounds": [
+      "narrator-test:narration_channel2"
+    ]
+  },
+  "narration_channel3": {
+    "sounds": [
+      "narrator-test:narration_channel3"
+    ]
+  },
+  "narration_channel4": {
+    "sounds": [
+      "narrator-test:narration_channel4"
+    ]
+  },
+  "narration_channel5": {
+    "sounds": [
+      "narrator-test:narration_channel5"
+    ]
+  },
+  "narration_channel6": {
+    "sounds": [
+      "narrator-test:narration_channel6"
     ]
   }
 }
-
