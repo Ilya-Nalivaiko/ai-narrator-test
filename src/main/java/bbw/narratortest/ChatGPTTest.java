@@ -32,6 +32,8 @@ public class ChatGPTTest {
         double temperature = ModConfig.getConfig().temperature;
         String systemPrompt = ModConfig.getConfig().systemPrompt;
 
+        systemPrompt += " IMPORTANT: keep it to a few sentences max";
+
         JSONObject json = new JSONObject();
         json.put("model", "gpt-4");
         json.put("temperature", temperature);
